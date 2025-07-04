@@ -50,15 +50,6 @@ config_file=~/.ssh/config
 #############################################
 #            DO NOT EDIT BELOW              #
 #############################################
-# For testing purposes - in case time is wrong due to VM snapshots
-sudo timedatectl set-ntp off
-sudo timedatectl set-ntp on
-
-# Move SSH certs to ~/.ssh and change permissions
-cp /home/$user/{$certName,$certName.pub} /home/$user/.ssh
-chmod 600 /home/$user/.ssh/$certName 
-chmod 644 /home/$user/.ssh/$certName.pub
-
 # Install k3sup to local machine if not already present
 if ! command -v k3sup version &> /dev/null
 then
