@@ -20,11 +20,9 @@
 `kubectl -n cattle-system get deploy rancher`</br>
 
 # Expose Rancher via Loadbalancer
-```
-kubectl get svc -n cattle-system
-kubectl expose deployment rancher --name=rancher-lb --port=443 --type=LoadBalancer -n cattle-system
-kubectl get svc -n cattle-system
-```
+`kubectl get svc -n cattle-system`</br>
+`kubectl expose deployment rancher --name=rancher-lb --port=443 --type=LoadBalancer -n cattle-system`</br>
+`kubectl get svc -n cattle-system`</br>
 
 # Go to Rancher GUI
 Hit the url… and create your account
