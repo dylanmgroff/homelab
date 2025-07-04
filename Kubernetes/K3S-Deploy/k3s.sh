@@ -208,7 +208,7 @@ kubectl wait --namespace metallb-system \
                 --selector=component=controller \
                 --timeout=120s
 kubectl apply -f ipAddressPool.yaml
-kubectl apply -f https://raw.githubusercontent.com/JamesTurland/JimsGarage/main/Kubernetes/K3S-Deploy/l2Advertisement.yaml
+kubectl apply -f https://raw.githubusercontent.com/dylanmgroff/homelab/refs/heads/main/Kubernetes/K3S-Deploy/l2Advertisement.yaml
 
 kubectl get nodes
 kubectl get svc
