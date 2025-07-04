@@ -50,6 +50,10 @@ config_file=~/.ssh/config
 #############################################
 #            DO NOT EDIT BELOW              #
 #############################################
+# For testing purposes - in case time is wrong due to VM snapshots
+sudo timedatectl set-ntp off
+sudo timedatectl set-ntp on
+
 # Install k3sup to local machine if not already present
 if ! command -v k3sup version &> /dev/null
 then
@@ -161,7 +165,7 @@ done
 # add workers
 for newagent in "${workers[@]}"; do
   k3sup join \
-    --ip $newagent \z
+    --ip $newagent \
     --user $user \
     --sudo \
     --k3s-version $k3sVersion \
