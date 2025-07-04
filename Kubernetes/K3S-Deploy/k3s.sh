@@ -139,7 +139,7 @@ echo -e " \033[32;5mFirst Node bootstrapped successfully!\033[0m"
 kubectl apply -f https://kube-vip.io/manifests/rbac.yaml
 
 # Step 3: Download kube-vip
-curl -sO https://raw.githubusercontent.com/JamesTurland/JimsGarage/main/Kubernetes/K3S-Deploy/kube-vip
+curl -sO https://raw.githubusercontent.com/dylanmgroff/homelab/refs/heads/main/Kubernetes/K3S-Deploy/kube-vip
 cat kube-vip | sed 's/$interface/'$interface'/g; s/$vip/'$vip'/g' > $HOME/kube-vip.yaml
 
 # Step 4: Copy kube-vip.yaml to master1
