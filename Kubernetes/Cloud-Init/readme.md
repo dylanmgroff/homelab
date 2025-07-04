@@ -13,10 +13,10 @@
 
 1. Modify the VM hardware to fit physical hardware
     - Memory 
-        - 16384 MiB (16 GiB)
+        - 4096 MiB (4 GiB)
         - Open advanced and untick "Balooning Device"
     - CPU
-        - 1 Socket, 4 Cores
+        - 1 Socket, 2 Cores
         - Change CPU type to Host <!-- This ensures the VM receives all the instruction sets and capabilities of the host processor -->
 
     - Hard Disk
