@@ -161,7 +161,7 @@ done
 # add workers
 for newagent in "${workers[@]}"; do
   k3sup join \
-    --ip $newagent \
+    --ip $newagent \z
     --user $user \
     --sudo \
     --k3s-version $k3sVersion \
