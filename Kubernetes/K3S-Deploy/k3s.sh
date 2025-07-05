@@ -12,10 +12,14 @@ k3sVersion="v1.32.6+k3s1"
 
 # Set the IP addresses of the master and work nodes
 master1=10.9.50.11
-master2=10.9.50.12
-master3=10.9.50.13
-worker1=10.9.50.14
-worker2=10.9.50.15
+master2=10.9.50.21
+master3=10.9.50.31
+worker1=10.9.50.12
+worker2=10.9.50.13
+worker3=10.9.50.22
+worker4=10.9.50.23
+worker5=10.9.50.32
+worker5=10.9.50.33
 
 # User of remote machines
 user=dylangroff
@@ -30,13 +34,13 @@ vip=10.9.50.50
 masters=($master2 $master3)
 
 # Array of worker nodes
-workers=($worker1 $worker2)
+workers=($worker1 $worker2 $worker3 $worker4 $worker5 $worker6)
 
 # Array of all
-all=($master1 $master2 $master3 $worker1 $worker2)
+all=($master1 $master2 $master3 $worker1 $worker2 $worker3 $worker4 $worker5 $worker6)
 
 # Array of all minus master
-allnomaster1=($master2 $master3 $worker1 $worker2)
+allnomaster1=($master2 $master3 $worker1 $worker2 $worker3 $worker4 $worker5 $worker6)
 
 #Loadbalancer IP range
 lbrange=10.9.50.60-10.9.50.80
