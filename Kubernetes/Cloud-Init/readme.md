@@ -16,7 +16,7 @@
     `qm set 5000 --boot c --bootdisk scsi0`</br>
     - creates virtual serial port to allow VSC access through proxmox</br>
     `qm set 5000 --serial0 socket --vga serial0`</br>
-    - Expand the VM disk size to a suitable size
+    - Expand the VM disk size to a suitable size</br>
     `qm disk resize 5000 scsi0 10G`</br>
 
 1. Create the VM on Kube2 via CLI </br>
@@ -34,7 +34,7 @@
     `qm set 5001 --boot c --bootdisk scsi0`</br>
     - creates virtual serial port to allow VSC access through proxmox</br>
     `qm set 5001 --serial0 socket --vga serial0`</br>
-    - Expand the VM disk size to a suitable size
+    - Expand the VM disk size to a suitable size</br>
     `qm disk resize 5001 scsi0 10G`</br>
 
 1. Create the VM on Kube2 via CLI </br>
@@ -52,7 +52,7 @@
     `qm set 5002 --boot c --bootdisk scsi0`</br>
     - creates virtual serial port to allow VSC access through proxmox</br>
     `qm set 5002 --serial0 socket --vga serial0`</br>
-    - Expand the VM disk size to a suitable size
+    - Expand the VM disk size to a suitable size</br>
     `qm disk resize 5002 scsi0 10G`</br>
 
 1. Modify the VM hardware to fit physical hardware
