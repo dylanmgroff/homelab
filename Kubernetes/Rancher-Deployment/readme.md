@@ -4,7 +4,7 @@
 `./get_helm.sh` </br>
 
 # Add Rancher Helm Repository
-`helm repo add rancher-latest https://releases.rancher.com/server-charts/stable`</br>
+`helm repo add rancher-stable https://releases.rancher.com/server-charts/stable`</br>
 `kubectl create namespace cattle-system`</br>
 
 # Install Cert-Manager
