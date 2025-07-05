@@ -3,7 +3,7 @@
 
 1. Create the VM on Kube1 via CLI </br>
     - create a virtual machine at ID 5000 with 4GB of memory, 2 cores, named ubuntu cloud, with a virtual network device bridged to the host NIC</br>
-    `qm create 5000 --memory 4096 --core 4 --name ubuntu-cloud --net0 virtio,bridge=vmbr0`</br>
+    `qm create 5000 --memory 4096 --core 2 --name ubuntu-cloud --net0 virtio,bridge=vmbr0`</br>
     - change directory to location of iso template downloaded in step 1</br>
     `cd /var/lib/vz/template/iso/`</br>
     - import the downloaded iso image into the VM using local storage</br>
@@ -21,7 +21,7 @@
 
 1. Create the VM on Kube2 via CLI </br>
     - create a virtual machine at ID 5001 with 4GB of memory, 2 cores, named ubuntu cloud, with a virtual network device bridged to the host NIC</br>
-    `qm create 5001 --memory 4096 --core 4 --name ubuntu-cloud --net0 virtio,bridge=vmbr0`</br>
+    `qm create 5001 --memory 4096 --core 2 --name ubuntu-cloud --net0 virtio,bridge=vmbr0`</br>
     - change directory to location of iso template downloaded in step 1</br>
     `cd /var/lib/vz/template/iso/`</br>
     - import the downloaded iso image into the VM using local storage</br>
@@ -37,9 +37,9 @@
     - Expand the VM disk size to a suitable size</br>
     `qm disk resize 5001 scsi0 10G`</br>
 
-1. Create the VM on Kube2 via CLI </br>
+1. Create the VM on Kube3 via CLI </br>
     - create a virtual machine at ID 5002 with 4GB of memory, 2 cores, named ubuntu cloud, with a virtual network device bridged to the host NIC</br>
-    `qm create 5002 --memory 4096 --core 4 --name ubuntu-cloud --net0 virtio,bridge=vmbr0`</br>
+    `qm create 5002 --memory 4096 --core 2 --name ubuntu-cloud --net0 virtio,bridge=vmbr0`</br>
     - change directory to location of iso template downloaded in step 1</br>
     `cd /var/lib/vz/template/iso/`</br>
     - import the downloaded iso image into the VM using local storage</br>
