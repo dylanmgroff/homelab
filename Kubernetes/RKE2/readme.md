@@ -46,3 +46,20 @@ sha256sum: WARNING: 1 computed checksum did NOT match
 
 ## 2-6. Make kube folder to run kubectl later
 `mkdir ~/.kube`
+
+## 2-7. Create the rke2 config file
+```
+sudo mkdir -p /etc/rancher/rke2
+touch config.yaml
+echo "tls-san:" >> config.yaml 
+echo "  - 10.9.50.50" >> config.yaml
+echo "  - 10.9.50.10" >> config.yaml
+echo "  - 10.9.50.20" >> config.yaml
+echo "  - 10.9.50.30" >> config.yaml
+echo "write-kubeconfig-mode: 0644" >> config.yaml
+echo "disable:" >> config.yaml
+echo "  - rke2-ingress-nginx" >> config.yaml
+```
+
+# 2-8. Copy config.yaml to rancher directory
+`sudo cp ~/config.yaml /etc/rancher/rke2/config.yaml`
