@@ -10,6 +10,7 @@ Download the kubectl checksum file:
 Validate the kubectl binary against the checksum file:  
 `echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check`  
 
+### Validation output
 If valid, the output is:  
 `kubectl: OK`   
 
