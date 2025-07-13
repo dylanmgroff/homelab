@@ -1,4 +1,4 @@
-# Install kubectl
+# 1. Install kubectl
 ## 1-1. ssh to node
 ## 1-2. Download and Validate the latest kubectl release
 Download the latest release:  
@@ -23,3 +23,12 @@ sha256sum: WARNING: 1 computed checksum did NOT match
 `sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl`   
 ## 1-4. Test to ensure the version you installed is up-to-date:
 `kubectl version --client`
+
+# 2. Install Kube VIP
+## 2-1. Create RKE2's self-installing manifest dir
+`sudo mkdir -p /var/lib/rancher/rke2/server/manifests`
+
+## 2-2. Install the kube-vip deployment into rke2's self-installing manifest folder
+`curl -sO https://raw.githubusercontent.com/JamesTurland/JimsGarage/main/Kubernetes/RKE2/kube-vip`
+`cat kube-vip | sed 's/$interface/'$interface'/g; s/$vip/'$vip'/g' > $HOME/kube-vip.yaml`
+`sudo mv kube-vip.yaml /var/lib/rancher/rke2/server/manifests/kube-vip.yaml`
