@@ -51,7 +51,7 @@ sha256sum: WARNING: 1 computed checksum did NOT match
 ```
 sudo mkdir -p /etc/rancher/rke2
 touch config.yaml
-echo "tls-san:" >> config.yaml 
+echo "tls-san:" >> config.yaml
 echo "  - 10.9.50.50" >> config.yaml
 echo "  - 10.9.50.10" >> config.yaml
 echo "  - 10.9.50.20" >> config.yaml
@@ -63,3 +63,6 @@ echo "  - rke2-ingress-nginx" >> config.yaml
 
 # 2-8. Copy config.yaml to rancher directory
 `sudo cp ~/config.yaml /etc/rancher/rke2/config.yaml`
+
+# 2-9 Update path with rke2-binaries
+`echo 'export KUBECONFIG=/etc/rancher/rke2/rke2.yaml' >> ~/.bashrc ; echo 'export PATH=${PATH}:/var/lib/rancher/rke2/bin' >> ~/.bashrc ; echo 'alias k=kubectl' >> ~/.bashrc ; source ~/.bashrc ;`
