@@ -29,6 +29,8 @@ sha256sum: WARNING: 1 computed checksum did NOT match
 `sudo mkdir -p /var/lib/rancher/rke2/server/manifests`
 
 ## 2-2. Install the kube-vip deployment into rke2's self-installing manifest folder
-`curl -sO https://raw.githubusercontent.com/JamesTurland/JimsGarage/main/Kubernetes/RKE2/kube-vip`
+`curl -sO https://raw.githubusercontent.com/dylanmgroff/homelab/refs/heads/main/Kubernetes/RKE2/kube-vip`
+
 `cat kube-vip | sed 's/$interface/'$interface'/g; s/$vip/'$vip'/g' > $HOME/kube-vip.yaml`
+
 `sudo mv kube-vip.yaml /var/lib/rancher/rke2/server/manifests/kube-vip.yaml`
