@@ -1,6 +1,6 @@
 # Install kubectl
-## 1. ssh to node
-## 2. Download and Validate the latest kubectl release
+## 1-1. ssh to node
+## 1-2. Download and Validate the latest kubectl release
 Download the latest release:  
 `curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"`   
 
@@ -18,7 +18,7 @@ If the check fails, `sha256` exits with nonzero status and prints output similar
 kubectl: FAILED
 sha256sum: WARNING: 1 computed checksum did NOT match
 ```
-## 3. Install kubectl
+## 1-3. Install kubectl
 `sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl`   
-## 4. Test to ensure the version you installed is up-to-date:
+## 1-4. Test to ensure the version you installed is up-to-date:
 `kubectl version --client`
