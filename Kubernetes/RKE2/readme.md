@@ -34,3 +34,15 @@ sha256sum: WARNING: 1 computed checksum did NOT match
 `cat kube-vip | sed 's/$interface/'$interface'/g; s/$vip/'$vip'/g' > $HOME/kube-vip.yaml`
 
 `sudo mv kube-vip.yaml /var/lib/rancher/rke2/server/manifests/kube-vip.yaml`
+
+## 2-3. Find and Replace all k3s entries to represent rke2
+`sudo sed -i 's/k3s/rke2/g' /var/lib/rancher/rke2/server/manifests/kube-vip.yaml`
+
+## 2-4. Copy kube-vip.yaml to home directory
+`sudo cp /var/lib/rancher/rke2/server/manifests/kube-vip.yaml ~/kube-vip.yaml`
+
+## 2-5. Change owner
+`sudo chown $dylangroff:dylangroff kube-vip.yaml`
+
+## 2-6. Make kube folder to run kubectl later
+`mkdir ~/.kube`
