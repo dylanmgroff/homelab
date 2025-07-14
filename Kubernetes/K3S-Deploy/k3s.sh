@@ -15,11 +15,8 @@ master1=10.9.50.11
 master2=10.9.50.21
 master3=10.9.50.31
 worker1=10.9.50.12
-worker2=10.9.50.13
-worker3=10.9.50.22
-worker4=10.9.50.23
-worker5=10.9.50.32
-worker6=10.9.50.33
+worker2=10.9.50.22
+worker3=10.9.50.32
 
 # User of remote machines
 user=dylangroff
@@ -43,7 +40,7 @@ all=($master1 $master2 $master3 $worker1 $worker2 $worker3 $worker4 $worker5 $wo
 allnomaster1=($master2 $master3 $worker1 $worker2 $worker3 $worker4 $worker5 $worker6)
 
 #Loadbalancer IP range
-lbrange=10.9.50.60-10.9.50.100
+lbrange=10.9.50.60-10.9.50.80
 
 #ssh certificate name variable
 certName=id_rsa
