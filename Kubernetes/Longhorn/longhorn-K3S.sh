@@ -45,19 +45,6 @@ else
     echo -e " \033[32;5mOpen-ISCSI already installed\033[0m"
 fi
 
-# Step 1: Add new longhorn nodes to cluster (note: label added)
-for newnode in "${storage[@]}"; do
-  k3sup join \
-    --ip $newnode \
-    --user $user \
-    --sudo \
-    --k3s-channel stable \
-    --server-ip $master1 \
-    --k3s-extra-args "--node-label \"longhorn=true\"" \
-    --ssh-key $HOME/.ssh/$certName
-  echo -e " \033[32;5mAgent node joined successfully!\033[0m"
-done
-
 # Step 2: Install Longhorn (using modified Official to pin to Longhorn Nodes)
 kubectl apply -f https://raw.githubusercontent.com/dylanmgroff/homelab/refs/heads/main/Kubernetes/Longhorn/longhorn.yaml
 kubectl get pods \
