@@ -34,7 +34,7 @@ spec:
         - name: TZ
           value: "America/Toronto"
         - name: WEBPASSWORD
-          value: 
+          value: ${{ secrets.KUBE_PIHOLE_WEBPASS }}
         - name: FTLCONF_REPLY_ADDR4
           value: pihole
         - name: PIHOLE_DNS_
