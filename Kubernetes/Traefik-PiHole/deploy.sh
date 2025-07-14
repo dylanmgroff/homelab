@@ -1,23 +1,5 @@
 #!/bin/bash
 
-# Step 0: Clone repository
-DESTINATION=~/Helm/Traefik
-if [ ! -d "`eval echo ${DESTINATION//>}`" ]; then
-    sudo apt install unzip -y
-    mkdir jimsgarage
-    mkdir Helm
-    mkdir Manifest
-    curl -L -o master.zip https://github.com/JamesTurland/JimsGarage/archive/refs/heads/main.zip
-    unzip master.zip -d ~/jimsgarage
-    cp -r ~/jimsgarage/JimsGarage-main/Kubernetes/Traefik-PiHole/* ~/
-    rm master.zip
-    rm -r ~/jimsgarage
-    echo -e " \033[32;5mRepo cloned - EDIT FILES!!!\033[0m"
-    exit
-else
-    echo -e " \033[32;5mRepo already exists, continuing...\033[0m"
-fi
-
 # Step 1: Check dependencies
 # Helm
 if ! command -v helm version &> /dev/null
