@@ -10,12 +10,12 @@ KVVERSION="v0.8.2"
 # Set the IP addresses of the admin, masters, and workers nodes
 admin=10.9.50.5
 master1=10.9.50.11
-master2=10.9.50.12
-master3=10.9.50.13
-worker1=10.9.50.21
-worker2=10.9.50.22
-worker3=10.9.50.23
-worker4=10.9.50.31
+master2=10.9.50.21
+master3=10.9.50.31
+worker1=10.9.50.12
+worker2=10.9.50.13
+worker3=10.9.50.22
+worker4=10.9.50.23
 worker5=10.9.50.32
 worker6=10.9.50.33
 
@@ -218,23 +218,22 @@ chmod 700 get_helm.sh
 ./get_helm.sh
 
 # Add Rancher Helm Repo & create namespace
-helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
+helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
 kubectl create namespace cattle-system
 
 # Install Cert-Manager
 echo -e " \033[32;5mDeploying Cert-Manager\033[0m"
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.2/cert-manager.crds.yaml
-helm repo add jetstack https://charts.jetstack.io
-helm repo update
-helm install cert-manager jetstack/cert-manager \
---namespace cert-manager \
---create-namespace \
---version v1.13.2
+helm install \
+  cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --version v1.18.2 \
+  --set crds.enabled=true
 kubectl get pods --namespace cert-manager
 
 # Install Rancher
 echo -e " \033[32;5mDeploying Rancher\033[0m"
-helm install rancher rancher-latest/rancher \
+helm install rancher rancher-stable/rancher \
  --namespace cattle-system \
  --set hostname=rancher.my.org \
  --set bootstrapPassword=admin
