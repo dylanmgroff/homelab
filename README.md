@@ -13,3 +13,8 @@ I'll be adding three HP EliteDesk G3 800 G3 minis to the stack. Each G3 has a qu
 
 ## Backups
 I try to adhere to the 3-2-1 rule of backups. 3 copies of everything, in 2 places, 1 of which is offsite. To that end my single NVMe drive and RAID0 scratch back themselves up using rsync to the RAID5 array every night. Then the RAID5 array is mirrored offsite to Backblaze B2 and Hetzner Storage Box. I check in on my B2 and Hetzner backups once a month to make sure they are up-to-date. I also make snapshots of the RAID arrays twice daily to protect mostly against careless deletions. I've had a few instances over the years where this backup plan has saved my bacon.
+
+As I expand my hardware stack I'll be integrating new hardware and services into this backup plan.
+
+## Goals
+I'm taking this opportunity to pop my Kubernetes cherry. The learning curve seems steep but it's invigorating to be back on it.
