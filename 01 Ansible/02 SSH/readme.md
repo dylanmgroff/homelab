@@ -1,26 +1,23 @@
-# Edit Hosts File
-```
-sudo nano /etc/ansible/hosts
-```
-
-# Fix SSH Key Permissions
-```
-chmod 600 ~/.ssh/ansible
-```
-# Ansible Ping Command
-```
-ansible all -m ping
-```
-
 # Create SSH Key
+## Generate Key
 ```
 ssh-keygen -t ed25519 -C "ansible"
+```
+## Specify Save Location
+```
+/home/dylangroff/.ssh/ansible
+```
+## Enter Passphrase
+```
+** Leave Blank **
 ```
 
 # Copy SSH Key
 ```
-ssh-copy-id -i ~/.ssh/ansible.pub 192.168.200.50
+ssh-copy-id -i ~/.ssh/ansible.pub <target IP Address>
 ```
+
+Note: You'll be prompted for the password of the target machine
 
 # Ansible Ping Command With New SSH Key
 ```
