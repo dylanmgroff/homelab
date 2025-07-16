@@ -1,11 +1,19 @@
 # Update Repos
-`sudo apt update`
+```
+sudo apt update
+```
 
 # Install Dependencies
-`sudo apt install software-properties-common`
+```
+sudo apt install software-properties-common
+```
 
 # Add Ansible Repo
-`sudo add-apt-repository --yes --update ppa:ansible/ansible`
+```
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+```
 
 # Install Ansible
-`sudo apt install ansible`
+```
+sudo apt install ansible
+```
