@@ -115,3 +115,15 @@ check rancher rollout and wait for completion
 ```
 kubectl -n cattle-system rollout status deploy/rancher
 ```
+
+wait for
+```
+deployment "rancher" successfully rolled out
+```
+
+Expose Rancher via Loadbalancer
+```
+kubectl get svc -n cattle-system
+kubectl expose deployment rancher --name=rancher-lb --port=443 --type=LoadBalancer -n cattle-system
+kubectl get svc -n cattle-system
+```
