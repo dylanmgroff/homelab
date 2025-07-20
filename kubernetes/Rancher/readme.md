@@ -26,7 +26,7 @@ kubectl get pods --namespace cert-manager
 ```
 helm install rancher rancher-stable/rancher \
  --namespace cattle-system \
- --set hostname=rancher.my.org \
+ --set hostname=rancher.manly.dylangroff.com \
  --set bootstrapPassword=admin
 kubectl -n cattle-system rollout status deploy/rancher
 kubectl -n cattle-system get deploy rancher
