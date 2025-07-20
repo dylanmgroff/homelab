@@ -6,7 +6,7 @@ chmod 700 get_helm.sh
 ```
 # Add Rancher Helm Repository
 ```
-helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
+helm repo add rancher-stable https://releases.rancher.com/server-charts/latest
 kubectl create namespace cattle-system
 ```
 
@@ -24,7 +24,7 @@ kubectl get pods --namespace cert-manager
 
 # Install Rancher
 ```
-helm install rancher rancher-latest/rancher \
+helm install rancher rancher-stable/rancher \
  --namespace cattle-system \
  --set hostname=rancher.my.org \
  --set bootstrapPassword=admin
@@ -83,7 +83,7 @@ This can be an CNAME record using your Traefik FQDN, or an A record using the sa
 Once the certificate and DNS record are ready, you can run your Rancher installation with one extra value set to 
 configure your Ingress provider to use your custom certificate:
 ```bash
-helm install rancher rancher-latest/rancher \
+helm install rancher rancher-stable/rancher \
   --namespace cattle-system \
   --set hostname=rancher.my.org \
   --set bootstrapPassword=admin \
