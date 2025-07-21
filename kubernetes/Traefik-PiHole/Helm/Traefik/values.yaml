@@ -24,6 +24,9 @@ ports:
         to: websecure
         scheme: https
         permanent: true
+  websecure:
+    tls:
+      enabled: true
       
 ingressRoute:
   dashboard:
