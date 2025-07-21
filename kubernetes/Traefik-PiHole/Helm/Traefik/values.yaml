@@ -19,12 +19,11 @@ nodeSelector:
 
 ports:
   web:
-    redirectTo:
-      port: websecure
-      priority: 10
-  websecure:
-    tls:
-      enabled: true
+    redirections:
+      entryPoint:
+        to: websecure
+        scheme: https
+        permanent: true
       
 ingressRoute:
   dashboard:
