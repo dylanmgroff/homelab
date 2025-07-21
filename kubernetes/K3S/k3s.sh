@@ -1,8 +1,8 @@
 # Version of Kube-VIP to deploy
-KVVERSION="v0.6.3"
+KVVERSION="v0.9.2"
 
 # K3S Version
-k3sVersion="v1.26.10+k3s2"
+k3sVersion="v1.33.2+k3s1"
 
 # Set the IP addresses of the master and work nodes
 master1=10.9.50.11
