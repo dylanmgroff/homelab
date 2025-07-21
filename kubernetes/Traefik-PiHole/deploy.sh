@@ -17,6 +17,9 @@ kubectl get pods -n traefik
 # Step 5: Apply Middleware
 kubectl apply -f ./Helm/Traefik/default-headers.yaml
 
+# Step 5: Apply Default SSL
+kubectl apply -f ./Helm/Traefik/default-ssl.yaml
+
 # Step 6: Create Secret for Traefik Dashboard
 kubectl apply -f ./Helm/Traefik/Dashboard/secret-dashboard.yaml
 
@@ -35,10 +38,7 @@ kubectl apply -f ./Helm/Traefik/Cert-Manager/Issuers/letsencrypt-production.yaml
 # Step 11: Apply production certificate
 kubectl apply -f ./Helm/Traefik/Cert-Manager/Certificates/Production/dylangroff-production.yaml
 
-# Step 12: Create PiHole namespace
-kubectl create namespace pihole
-
-# Step 13: Deploy PiHole
+# Step 12: Deploy PiHole
 kubectl apply -f ./Manifest/PiHole
 
 echo -e " \033[32;5mScript finished. Be sure to create PVC for PiHole in Longhorn UI\033[0m"
