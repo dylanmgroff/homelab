@@ -10,7 +10,7 @@ master2=10.9.50.21
 master3=10.9.50.31
 worker1=10.9.50.12
 worker2=10.9.50.22
-worker2=10.9.50.32
+worker3=10.9.50.32
 
 # User of remote machines
 user=dylangroff
