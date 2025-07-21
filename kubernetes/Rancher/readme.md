@@ -6,19 +6,19 @@ chmod 700 get_helm.sh
 ```
 # Add Rancher Helm Repository
 ```
-helm repo add rancher-stable https://releases.rancher.com/server-charts/latest
+helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
 kubectl create namespace cattle-system
 ```
 
 # Install Cert-Manager
 ```
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.2/cert-manager.crds.yaml
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
 helm install cert-manager jetstack/cert-manager \
 --namespace cert-manager \
 --create-namespace \
---version v1.13.2
+--version v1.18.2
 kubectl get pods --namespace cert-manager
 ```
 
