@@ -8,52 +8,38 @@ additionalArguments:
 
 deployment:
   enabled: true
-  replicas: 3
+  replicas: 2 # match with number of workers
   annotations: {}
   podAnnotations: {}
   additionalContainers: []
   initContainers: []
 
 nodeSelector: 
-  worker: "true"
+  worker: "true" # add these labels to your worker nodes before running - see video
 
 ports:
   web:
-    redirections:
-      entryPoint:
-        to: websecure
-        scheme: https
-        permanent: true
-
+    redirectTo:
+      port: websecure
+      priority: 10
+  websecure:
+    tls:
+      enabled: true
+      
 ingressRoute:
   dashboard:
-    enabled: true
-    matchRule: Host(`traefik.manly.dylangroff.com`)
-    entryPoints: ["websecure"]
-    middlewares:
-      - name: traefik-dashboard
+    enabled: false
 
-ingressClass:
-  name: traefik
 providers:
   kubernetesCRD:
-    ingressClass: traefik
+    enabled: true
+    ingressClass: traefik-external
+    allowExternalNameServices: true
   kubernetesIngress:
-    ingressClass: traefik
-
-extraObjects:
-  - apiVersion: traefik.io/v1alpha1
-    kind: Middleware
-    metadata:
-      name: traefik-dashboard
-    spec:
-      basicAuth:
-        secret: traefik-auth
-
-tlsStore:
-  default:
-    defaultCertificate:
-      secretName: dylangroff-tls
+    enabled: true
+    allowExternalNameServices: true
+    publishedService:
+      enabled: false
 
 rbac:
   enabled: true
@@ -64,6 +50,6 @@ service:
   annotations: {}
   labels: {}
   spec:
-    loadBalancerIP: 10.9.50.65
+    loadBalancerIP: 192.168.3.65 # this should be an IP in the Kube-VIP range
   loadBalancerSourceRanges: []
   externalIPs: []

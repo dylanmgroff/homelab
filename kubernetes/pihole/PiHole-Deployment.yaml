@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: traefik
+  name: pihole
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -10,7 +10,7 @@ metadata:
     app: pihole
     app.kubernetes.io/instance: pihole
   name: pihole
-  namespace: traefik
+  namespace: pihole
 spec:
   replicas: 1
   selector:
@@ -32,9 +32,9 @@ spec:
           value: 127.0.0.1:3000
       - env:
         - name: TZ
-          value: "America/Toronto"
+          value: "Europe/London"
         - name: WEBPASSWORD
-          value:
+          value: password # change this!
         - name: FTLCONF_REPLY_ADDR4
           value: pihole
         - name: PIHOLE_DNS_
@@ -77,7 +77,7 @@ metadata:
   labels:
     app: pihole
   name: pihole
-  namespace: traefik 
+  namespace: pihole 
 spec:
   ports:
   - name: dns-udp
@@ -103,5 +103,5 @@ spec:
   selector:
     app: pihole
   externalTrafficPolicy: Local
-  loadBalancerIP: 10.9.50.67
+  loadBalancerIP: 192.168.3.67 # this is your DNS IP, NOT THE GUI!
   type: LoadBalancer
