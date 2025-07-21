@@ -3,7 +3,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: pihole
-  namespace: pihole
+  namespace: traefik
   annotations: 
     kubernetes.io/ingress.class: traefik-external
 spec:
@@ -23,4 +23,6 @@ spec:
       middlewares:
         - name: default-headers
   tls:
-    secretName: dylangroff-tls
+    - hosts:
+      - dylangroff.com
+      secretName: dylangroff-tls
