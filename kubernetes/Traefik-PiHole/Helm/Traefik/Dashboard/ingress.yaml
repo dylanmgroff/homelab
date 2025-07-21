@@ -18,6 +18,5 @@ spec:
         - name: api@internal
           kind: TraefikService
   tls:
-    - hosts:
-      - dylangroff.com
-      secretName: dylangroff-tls
+    store:
+      name: default-cloudflare-tls
