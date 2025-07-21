@@ -10,4 +10,4 @@ spec:
     - "*.dylangroff.com"
   issuerRef:
     name: cloudflare
-    kind: Issuer
+    kind: ClusterIssuer
