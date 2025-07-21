@@ -10,19 +10,13 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`www.pihole.manly.dylangroff.com`)
-      kind: Rule
-      services:
-        - name: pihole
-          port: 80
-    - match: Host(`pihole.manly.dylangroff.com`)
-      kind: Rule
+    - kind: Rule
+      match: Host(`pihole.manly.dylangroff.com`)
       services:
         - name: pihole
           port: 80
       middlewares:
         - name: default-headers
   tls:
-    - hosts:
-      - dylangroff.com
-      secretName: dylangroff-tls
+    store:
+      name: default-cloudflare-tls
