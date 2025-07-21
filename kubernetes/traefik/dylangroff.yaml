@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: dylangroff
+  namespace: traefik
+spec:
+  secretName: dylangroff-tls
+  dnsNames:
+    - "dylangroff.com"
+    - "*.dylangroff.com"
+  issuerRef:
+    name: cloudflare
+    kind: Issuer
