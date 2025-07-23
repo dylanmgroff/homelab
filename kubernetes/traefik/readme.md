@@ -12,7 +12,7 @@ helm install \
 reflector emberstack/reflector \
 --create-namespace \
 --namespace reflector \
--f reflector-values.yaml
+-f ~/traefik/reflector-values.yaml
 ```
 
 # Create Traefik namespace
