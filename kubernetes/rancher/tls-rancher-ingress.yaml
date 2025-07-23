@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rancher-dylangroff
+  namespace: cattle-system
+spec:
+  commonName: rancher.manly.dylangroff.com
+  dnsNames:
+    - rancher.manly.dylangroff.com
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  secretName: tls-rancher-ingress
