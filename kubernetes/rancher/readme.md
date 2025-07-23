@@ -10,9 +10,6 @@ helm install rancher rancher-stable/rancher \
 --namespace cattle-system \
 --set hostname=rancher.manly.dylangroff.com \
 --set bootstrapPassword=admin
---set ingress.tls.source=letsEncrypt \
---set letsEncrypt.email=me@example.org \
---set letsEncrypt.ingress.class=traefik \
 --set ingress.tls.source=secret
 kubectl -n cattle-system rollout status deploy/rancher
 kubectl -n cattle-system get deploy rancher
