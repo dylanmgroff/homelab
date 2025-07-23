@@ -2,9 +2,9 @@
 master1=10.9.50.11
 
 # Set the IP addresses of your Longhorn nodes
-longhorn1=10.9.50.19
-longhorn2=10.9.50.29
-longhorn3=10.9.50.39
+longhorn1=10.9.50.12
+longhorn2=10.9.50.22
+longhorn3=10.9.50.32
 
 # User of remote machines
 user=dylangroff
