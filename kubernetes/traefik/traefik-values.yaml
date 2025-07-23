@@ -69,10 +69,9 @@ logs:
 
 experimental:
   plugins:
-    enabled: true
     crowdsec:
       moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
-      version: v1.3.5
+      version: v1.4.4
 
 volumes:
   - name: crowdsec-bouncer-tls
