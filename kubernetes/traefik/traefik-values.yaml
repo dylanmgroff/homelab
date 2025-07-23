@@ -5,8 +5,6 @@ globalArguments:
 additionalArguments:
   - "--serversTransport.insecureSkipVerify=true"
   - "--log.level=INFO"
-  - "--experimental.plugins.bouncer.moduleName=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
-  - "--experimental.plugins.bouncer.version=v1.1.16"
   - "--entrypoints.web.http.middlewares=traefik-bouncer@kubernetescrd"
   - "--entrypoints.websecure.http.middlewares=traefik-bouncer@kubernetescrd"
   - "--providers.kubernetescrd"
@@ -69,7 +67,7 @@ logs:
 
 experimental:
   plugins:
-    crowdsec:
+    bouncer:
       moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
       version: v1.4.4
 
