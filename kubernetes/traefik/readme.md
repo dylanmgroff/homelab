@@ -8,11 +8,7 @@ helm repo update
 
 # Install Emberstack
 ```
-helm install \
-reflector emberstack/reflector \
---create-namespace \
---namespace reflector \
--f ~/traefik/reflector-values.yaml
+helm install reflector emberstack/reflector --create-namespace --namespace reflector -f ~/traefik/reflector-values.yaml
 ```
 
 # Create Traefik namespace
@@ -66,13 +62,19 @@ kubectl apply -f ~/traefik/cert-manager/issuers/letsencrypt-production.yaml
 kubectl apply -f ~/traefik/cert-manager/certificates/Production/dylangroff-production.yaml
 ```
 
-# Install Crowdsec
+# Install Crowdsec READ ALL OF THIS FIRST!!
 ```
-helm install \
-crowdsec crowdsec/crowdsec \
---create-namespace \
---namespace crowdsec \
--f ~/traefik/crowdsec-values.yaml
+helm install crowdsec crowdsec/crowdsec --create-namespace --namespace crowdsec -f ~/traefik/crowdsec-values.yaml
+```
+# Right away drop in the next command, find the container code and replace the <> then drop in that command. It will spit out a registry code.
+```
+kubectl -n crowdsec get pods
+kubectl -n crowdsec exec -it crowdsec-lapi-<>-- cscli bouncers add my-bouncer-name
+```
+
+# Update crowdsec-values.yaml with the generated key then upgrade the deployment
+```
+helm upgrade crowdsec crowdsec/crowdsec --namespace crowdsec -f ~/traefik/crowdsec-values.yaml
 ```
 
 # Apply Bouncer Middleware
