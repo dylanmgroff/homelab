@@ -5,6 +5,8 @@ metadata:
   namespace: traefik
   annotations: 
     kubernetes.io/ingress.class: traefik-external
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-bouncer@kubernetescrd
+    traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
   entryPoints:
     - websecure
