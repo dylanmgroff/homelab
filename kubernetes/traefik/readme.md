@@ -72,7 +72,7 @@ helm install \
 crowdsec crowdsec/crowdsec \
 --create-namespace \
 --namespace crowdsec \
--f crowdsec-values.yaml
+-f ~/traefik/crowdsec-values.yaml
 ```
 
 # Apply Bouncer Middleware
