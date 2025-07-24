@@ -28,11 +28,7 @@ chmod 700 get_helm.sh
 
 # Install Cert-Manager
 ``` bash
-helm repo add jetstack https://charts.jetstack.io --force-update
-helm install \
-  cert-manager jetstack/cert-manager \
-  --version v1.18.2 \
-  --set crds.enabled=true
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.yaml
 ```
 
 # Install Cloudflare Origin CA Issuer
@@ -52,7 +48,7 @@ kubectl apply -f ~/cforigin/deploy/originca/api-token-secret.yaml -f ~/cforigin/
 ```
 Check the status of the OriginIssuer
 ```bash
-kubectl get originissuer.cert-manager.k8s.cloudflare.com prod-issuer -o json | jq .status.conditions
+kubectl get originissuer.cert-manager.k8s.cloudflare.com prodissuer -o json | jq .status.conditions
 ```
 ### Origin CA Key
 Use the same API key as above for the secret
@@ -61,8 +57,45 @@ kubectl apply -f ~/cforigin/deploy/originca/service-key-secret.yaml -f ~/cforigi
 ```
 Check the status of the OriginIssuer
 ```bash
-kubectl get originissuer.cert-manager.k8s.cloudflare.com prod-issuer -o json | jq .status.conditions
+kubectl get originissuer.cert-manager.k8s.cloudflare.com prodissuer -o json | jq .status.conditions
 ```
+
+## Create Certificates
+```bash
+kubectl apply -f ~/cforigin/deploy/certificates
+```
+
+# Install Rancher 
+## Add Rancher Helm Repository
+```bash
+helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+kubectl create namespace cattle-system
+```
+
+# Install Rancher
+```bash
+helm install rancher rancher-stable/rancher \
+--namespace cattle-system \
+--set hostname=rancher.manly.dylangroff.com \
+--set bootstrapPassword=admin
+--set ingress.tls.source=secret
+kubectl -n cattle-system rollout status deploy/rancher
+kubectl -n cattle-system get deploy rancher
+```
+
+# Apply Rancher TLS Secret
+```
+kubectl apply -f ~/rancher/tls-rancher-ingress.yaml
+```
+
+# Expose Rancher via Loadbalancer
+```
+kubectl get svc -n cattle-system
+kubectl expose deployment rancher --name=rancher-lb --port=443 --type=LoadBalancer -n cattle-system
+kubectl get svc -n cattle-system
+```
+
+# Go to Rancher GUI
 
 # Install Traefik
 ## Add Helm Repos
@@ -91,7 +124,7 @@ kubectl apply -f ~/traefik/default-headers.yaml
 ```
 ## Create Secret for Traefik Dashboard
 ```bash
-kubectl apply -f ~/traefik/dashboard/secret-dashboard.yaml
+kubectl apply -f ~/traefik/dashboard/dashboard-secret.yaml
 ```
 ## Apply Middleware
 ```bash

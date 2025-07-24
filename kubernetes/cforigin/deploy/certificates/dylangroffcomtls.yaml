@@ -1,7 +1,7 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: dylangroffcom
+  name: dylangroffcomtls
   namespace: default
 spec:
   # The secret name where cert-manager should store the signed certificate
