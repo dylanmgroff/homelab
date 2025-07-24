@@ -11,20 +11,15 @@ helm repo update
 helm install reflector emberstack/reflector --create-namespace --namespace reflector -f ~/traefik/reflector-values.yaml
 ```
 
-# Create Traefik namespace
-```
-kubectl create namespace traefik
-```
-
 # Install Traefik
 ```
-helm install --namespace=traefik traefik traefik/traefik -f ~/traefik/traefik-values.yaml
+helm install --namespace=default traefik traefik/traefik -f ~/traefik/traefik-values.yaml
 ```
 
 # Check Traefik deployment
 ```
-kubectl get svc -n traefik
-kubectl get pods -n traefik
+kubectl get svc
+kubectl get pods
 ```
 
 # Apply Middleware
@@ -47,34 +42,19 @@ kubectl apply -f ~/traefik/dashboard/middleware.yaml
 kubectl apply -f ~/traefik/dashboard/ingress.yaml
 ```
 
-# Apply secret for certificate
-```
-kubectl apply -f ~/traefik/cert-manager/issuers/secret-cf-token.yaml
-```
-
-# Apply production certificate issuer
-```
-kubectl apply -f ~/traefik/cert-manager/issuers/letsencrypt-production.yaml
-```
-
-# Apply production certificate
-```
-kubectl apply -f ~/traefik/cert-manager/certificates/Production/dylangroff-production.yaml
-```
-
 # Install Crowdsec READ ALL OF THIS FIRST!!
 ```
-helm install crowdsec crowdsec/crowdsec --create-namespace --namespace crowdsec -f ~/traefik/crowdsec-values.yaml
+helm install crowdsec crowdsec/crowdsec --namespace default -f ~/traefik/crowdsec-values.yaml
 ```
 # Right away drop in the next command, find the container code and replace the <> then drop in that command. It will spit out a registry code.
 ```
-kubectl -n crowdsec get pods
-kubectl -n crowdsec exec -it crowdsec-lapi-<>-- cscli bouncers add my-bouncer-name
+kubectl get pods
+kubectl exec -it crowdsec-lapi-<> -- cscli bouncers add traefik-bouncer
 ```
 
 # Update crowdsec-values.yaml with the generated key then upgrade the deployment
 ```
-helm upgrade crowdsec crowdsec/crowdsec --namespace crowdsec -f ~/traefik/crowdsec-values.yaml
+helm upgrade crowdsec crowdsec/crowdsec --namespace default -f ~/traefik/crowdsec-values.yaml
 ```
 
 # Apply Bouncer Middleware

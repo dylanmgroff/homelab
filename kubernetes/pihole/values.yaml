@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: traefik
+  name: default
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -10,7 +10,7 @@ metadata:
     app: pihole
     app.kubernetes.io/instance: pihole
   name: pihole
-  namespace: traefik
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -34,7 +34,7 @@ spec:
         - name: TZ
           value: "America/Toronto"
         - name: WEBPASSWORD
-          value: 
+          value: AuRkSCGwPi3ae9ynUUwnY6e6urXiZzN8
         - name: FTLCONF_REPLY_ADDR4
           value: pihole
         - name: PIHOLE_DNS_
@@ -77,7 +77,7 @@ metadata:
   labels:
     app: pihole
   name: pihole
-  namespace: traefik 
+  namespace: default 
 spec:
   ports:
   - name: dns-udp

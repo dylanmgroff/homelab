@@ -5,9 +5,6 @@ globalArguments:
 additionalArguments:
   - "--serversTransport.insecureSkipVerify=true"
   - "--log.level=INFO"
-  - "--entrypoints.web.http.middlewares=traefik-bouncer@kubernetescrd"
-  - "--entrypoints.websecure.http.middlewares=traefik-bouncer@kubernetescrd"
-  - "--providers.kubernetescrd"
 
 deployment:
   enabled: true
@@ -30,7 +27,20 @@ ports:
   websecure:
     tls:
       enabled: true
+
+tlsStore:
+  default:
+    defaultCertificate:
+      secretName: dylangroffcomtls
       
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+
 ingressRoute:
   dashboard:
     enabled: false
@@ -38,9 +48,8 @@ ingressRoute:
 providers:
   kubernetesCRD:
     enabled: true
-    ingressClass: traefik-external
+    ingressClass: traefikexternal
     allowExternalNameServices: true
-    allowCrossNamespace: true
   kubernetesIngress:
     enabled: true
     allowExternalNameServices: true
@@ -57,24 +66,5 @@ service:
   labels: {}
   spec:
     loadBalancerIP: 10.9.50.65
-    externalTrafficPolicy: Local
   loadBalancerSourceRanges: []
   externalIPs: []
-
-logs:
-  access:
-    enabled: true
-
-experimental:
-  plugins:
-    bouncer:
-      moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
-      version: v1.4.4
-
-volumes:
-  - name: crowdsec-bouncer-tls
-    mountPath: /etc/traefik/crowdsec-certs/
-    type: secret
-
-image:
-  pullPolicy: Always

@@ -3,7 +3,7 @@ tls:
   enabled: true
   bouncer:
     reflector:
-      namespaces: ["traefik"]
+      namespaces: ["default"]
 agent:
   tolerations:
     - key: node-role.kubernetes.io/control-plane
@@ -12,7 +12,7 @@ agent:
   # Specify each pod whose logs you want to process
   acquisition:
     # The namespace where the pod is located
-    - namespace: traefik
+    - namespace: default
       # The pod name
       podName: traefik-*
       # as in crowdsec configuration, we need to specify the program name to find a matching parser
@@ -49,13 +49,13 @@ lapi:
     - name: DISABLE_ONLINE_API
       value: "false"
     - name: ENROLL_KEY
-      value: ""
+      value: "cls1bg0kr0000l808r9j9wwup"
     - name: ENROLL_INSTANCE_NAME
       value: "manlykube"
     - name: ENROLL_TAGS
       value: "homelab"
     - name: BOUNCER_KEY_manlykube
-      value: ""
+      value: "PQ0YauU4IH/BDyfQETonNWAZKzs/41fzFFWOsGFUZns"
   nodeSelector: 
     worker: "true"
 image:
