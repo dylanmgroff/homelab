@@ -5,11 +5,11 @@ metadata:
   name: dylangroff
   namespace: traefik
 spec:
-  secretName: dylangroff-tls
+  secretName: dylangroff-tls-production
   issuerRef:
-    name: letsencryptproduction
+    name: letsencrypt-production
     kind: ClusterIssuer
-  commonName: "*.dylangroff.com"
+  commonName: "*.manly.dylangroff.com"
   dnsNames:
-  - "*.dylangroff.com"
-  - dylangroff.com
+  - "*.manly.dylangroff.com"
+  - manly.dylangroff.com

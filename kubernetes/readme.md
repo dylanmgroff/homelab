@@ -42,17 +42,7 @@ chmod 700 get_helm.sh
 ``` bash
 brew install cmctl
 helm repo add jetstack https://charts.jetstack.io
-helm install \
-    cert-manager \
-    jetstack/cert-manager \
-    --namespace cert-manager \
-    --version v1.18.2 \
-    --values ~/cert-manager/values.yaml
-helm upgrade \
-    cert-manager \
-    jetstack/cert-manager \
-    --namespace cert-manager \
-    
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.yaml
 kubectl get pods --namespace cert-manager
 cmctl check api
 ```
@@ -63,13 +53,13 @@ cat <<EOF > test-resources.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cert-manager-test
+  name: cert-manager
 ---
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: test-selfsigned
-  namespace: cert-manager-test
+  namespace: cert-manager
 spec:
   selfSigned: {}
 ---
@@ -77,7 +67,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: selfsigned-cert
-  namespace: cert-manager-test
+  namespace: cert-manager
 spec:
   dnsNames:
     - example.com
@@ -88,14 +78,34 @@ EOF
 ```
 ```bash
 kubectl apply -f test-resources.yaml
-kubectl describe certificate -n cert-manager-test
+kubectl describe certificate -n cert-manager
 ```
-
 Status of certificate should be "Certificate issued successfully"
-
 ## Clean up test resources
 ```bash
 kubectl delete -f test-resources.yaml
+```
+
+# Install Rancher 
+## Add Rancher Helm Repository
+```bash
+helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+kubectl create namespace cattle-system
+```
+## Install Rancher
+```bash
+helm install rancher rancher-stable/rancher \
+--namespace cattle-system \
+--set hostname=rancher.manly.dylangroff.com \
+--set bootstrapPassword=admin
+kubectl -n cattle-system rollout status deploy/rancher
+kubectl -n cattle-system get deploy rancher
+```
+## Expose Rancher via Loadbalancer
+```bash
+kubectl get svc -n cattle-system
+kubectl expose deployment rancher --name=rancher-lb --port=443 --type=LoadBalancer -n cattle-system
+kubectl get svc -n cattle-system
 ```
 
 # Install Traefik
@@ -110,6 +120,10 @@ helm repo update
 ```bash
 kubectl create namespace traefik
 ```
+## Check Traefik Namespace
+```bash
+kubectl get namespaces
+```
 ## Install Traefik
 ```bash
 helm install traefik --namespace=traefik traefik/traefik -f ~/traefik/traefik-values.yaml
@@ -123,9 +137,17 @@ kubectl get pods -n traefik
 ```bash
 kubectl apply -f ~/traefik/default-headers.yaml
 ```
+## Check Middleware
+```bash
+kubectl get middleware
+```
 ## Create Secret for Traefik Dashboard
 ```bash
 kubectl apply -f ~/traefik/dashboard/dashboard-secret.yaml
+```
+## Check Secret for Traefik Dashboard
+```bash
+kubectl get secrets --namespace traefik
 ```
 ## Apply Middleware
 ```bash
@@ -139,6 +161,30 @@ kubectl apply -f ~/traefik/dashboard/ingress.yaml
 ```bash
 kubectl apply -f ~/traefik/cert-manager/issuers/secret-cf-token.yaml
 ```
+## Apply staging certificate issuer
+```bash
+kubectl apply -f ~/traefik/cert-manager/issuers/letsencrypt-staging.yaml
+```
+## Apply staging certificate
+```bash
+kubectl apply -f ~/traefik/cert-manager/certificates/staging/dylangroffcomtls.yaml
+```
+## Get cert-manager pods
+```bash
+kubectl get pods -n cert-manager
+```
+## Check cert-manager logs
+```bash
+kubectl get logs -n cert-manager -f cert-manager-#####
+```
+## Get challenges
+```bash
+kubectl get challenges
+```
+## Get more details
+```bash
+kubectl describe order dylangroff-#####
+```
 ## Apply production certificate issuer
 ```bash
 kubectl apply -f ~/traefik/cert-manager/issuers/letsencrypt-production.yaml
@@ -147,41 +193,7 @@ kubectl apply -f ~/traefik/cert-manager/issuers/letsencrypt-production.yaml
 ```bash
 kubectl apply -f ~/traefik/cert-manager/certificates/production/dylangroffcomtls.yaml
 ```
-
-# Install Rancher 
-## Add Rancher Helm Repository
-```bash
-helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
-kubectl create namespace cattle-system
-```
-
-## Create Rancher Certificate
-```bash
-kubectl apply -f ~/rancher/tls-rancher-ingress.yaml
-```
-
-# Install Rancher
-```bash
-helm install rancher rancher-stable/rancher \
---namespace cattle-system \
---set hostname=rancher.manly.dylangroff.com \
---set bootstrapPassword=admin
---set ingress.tls.source=secret
-kubectl -n cattle-system rollout status deploy/rancher
-kubectl -n cattle-system get deploy rancher
-```
-
-# Apply Rancher TLS Secret
-```
-kubectl apply -f ~/rancher/tls-rancher-ingress.yaml
-```
-
-# Expose Rancher via Loadbalancer
-```
-kubectl get svc -n cattle-system
-kubectl expose deployment rancher --name=rancher-lb --port=443 --type=LoadBalancer -n cattle-system
-kubectl get svc -n cattle-system
-```
+Then just wait for the certificate to be issued! Be patient!!
 
 # Go to Rancher GUI
 

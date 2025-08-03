@@ -43,6 +43,11 @@ providers:
     publishedService:
       enabled: false
 
+tlsStore:
+  default:
+    defaultCertificate:
+      secretName: dylangroff-tls-production
+
 rbac:
   enabled: true
 
