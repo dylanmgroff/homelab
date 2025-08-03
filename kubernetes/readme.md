@@ -246,3 +246,39 @@ kubectl apply -f ~/crowdsec/bouncer-middleware.yaml
 <br/>
 <br/>
 
+# Install Longhorn
+Copy folder to home director
+
+## Make script executable
+```bash
+chmod 764 longhorn.sh
+```
+
+## Run script
+```bash
+./longhorn/longhorn.sh
+```
+
+## Create SMB secret
+```bash
+kubectl apply -f ~/longhorn/smb-secret.yaml
+```
+<br/>
+<br/>
+<br/>
+
+# Install PiHole
+## Create PiHole namespace
+```bash
+kubectl create namespace pihole
+```
+
+## Update values.yaml with webpass
+
+## Deploy PiHole
+```bash
+kubectl apply -f ~/pihole
+```
+<br/>
+<br/>
+<br/>
