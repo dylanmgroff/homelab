@@ -56,7 +56,7 @@ for newnode in "${storage[@]}"; do
 done
 
 # Step 2: Install Longhorn (using modified Official to pin to Longhorn Nodes)
-kubectl apply -f https://raw.githubusercontent.com/dylanmgroff/homelab/refs/heads/main/kubernetes/longhorn/longhorn.yaml
+kubectl apply -f ~/longhorn/longhorn.yaml
 kubectl get pods \
 --namespace longhorn-system \
 --watch
