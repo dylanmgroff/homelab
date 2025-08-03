@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rancher
+  namespace: default
+spec:
+  externalName: 10.9.50.60
+  type: ExternalName
+  ports:
+  - name: websecure
+    port: 80
+    targetPort: 80
