@@ -17,7 +17,9 @@ spec:
       nodeSelector:
         worker: "true"
       containers:
-        - env:
+        - name: ddns-dg-montreal
+          image: oznu/cloudflare-ddns:latest
+          env:
             - name: API_KEY
               valueFrom: 
                 secretKeyRef:
@@ -29,6 +31,11 @@ spec:
               value: montreal
             - name: ZONE
               value: dylangroff.com
-          image: oznu/cloudflare-ddns:latest
-          name: ddns-dg-montreal
+          livenessProbe:
+            exec:
+              command:
+              - cat
+              - /config/cloudflare.conf
+            initialDelaySeconds: 5
+            periodSeconds: 5
       restartPolicy: Always
