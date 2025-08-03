@@ -15,6 +15,10 @@ qm set 5000 --serial0 socket --vga serial0
 qm disk resize 5000 scsi0 10G
 ```
 ## Create the Cloud-Init template 
+
+
+
+
 # Deploy new VMs by cloning the template (full clone)
 One master and one worker node per machine
 # Deploy K3S
@@ -23,10 +27,6 @@ Copy k3s/k3s.sh to admin machine home directory and make it executable.
 Copy cloud-init id_rsa to admin machine home directory
 
 Execute the script
-#
-#
-#
-#
 # Install helm
 ``` bash
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
