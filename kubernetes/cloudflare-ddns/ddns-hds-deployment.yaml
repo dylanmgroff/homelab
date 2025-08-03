@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ddns-hds
+  name: ddns-hds
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ddns-hds
+  template:
+    metadata:
+      labels:
+        app: ddns-hds
+    spec:
+      nodeSelector:
+        worker: "true"
+      containers:
+        - env:
+            - name: API_KEY
+              valueFrom: 
+                secretKeyRef:
+                  name: cloudflare-api-secret
+                  key: cloudflare-api
+            - name: PROXIED
+              value: "true"
+            - name: SUBDOMAIN
+              value: montreal
+            - name: ZONE
+              value: hotdogsound.com
+          image: oznu/cloudflare-ddns:latest
+          imagePullPolicy: IfNotPresent
+          name: ddns-hds-montreal
+      restartPolicy: Always

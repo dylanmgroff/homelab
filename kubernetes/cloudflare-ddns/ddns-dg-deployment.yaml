@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ddns-dg
+  name: ddns-dg
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ddns-dg
+  template:
+    metadata:
+      labels:
+        app: ddns-dg
+    spec:
+      nodeSelector:
+        worker: "true"
+      containers:
+        - env:
+            - name: API_KEY
+              valueFrom: 
+                secretKeyRef:
+                  name: cloudflare-api-secret
+                  key: cloudflare-api
+            - name: PROXIED
+              value: "true"
+            - name: SUBDOMAIN
+              value: montreal
+            - name: ZONE
+              value: dylangroff.com
+          image: oznu/cloudflare-ddns:latest
+          name: ddns-dg-montreal
+      restartPolicy: Always
