@@ -41,11 +41,17 @@ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scrip
 chmod 700 get_helm.sh
 ./get_helm.sh
 ```
+<br/>
+<br/>
+<br/>
 
 # Install Homebrew
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
+<br/>
+<br/>
+<br/>
 
 # Install Cert-Manager
 ``` bash
@@ -94,6 +100,9 @@ Status of certificate should be "Certificate issued successfully"
 ```bash
 kubectl delete -f test-resources.yaml
 ```
+<br/>
+<br/>
+<br/>
 
 # Install Rancher 
 ## Add Rancher Helm Repository
@@ -116,6 +125,9 @@ kubectl get svc -n cattle-system
 kubectl expose deployment rancher --name=rancher-lb --port=443 --type=LoadBalancer -n cattle-system
 kubectl get svc -n cattle-system
 ```
+<br/>
+<br/>
+<br/>
 
 # Install Traefik
 ## Add Helm Repos
@@ -204,8 +216,9 @@ kubectl apply -f ~/traefik/cert-manager/certificates/production/dylangroffcomtls
 kubectl apply -f ~/traefik/cert-manager/certificates/production/manlydylangroffcomtls.yaml
 ```
 Then just wait for the certificate to be issued! Be patient!!
-
-# Go to Rancher GUI
+<br/>
+<br/>
+<br/>
 
 # Install Crowdsec
 ## Install Emberstack
@@ -221,7 +234,6 @@ helm install crowdsec crowdsec/crowdsec -f ~/crowdsec/crowdsec-values.yaml
 kubectl get pods
 kubectl exec -it crowdsec-lapi-<> -- cscli bouncers add traefik-bouncer
 ```
-
 # Update crowdsec-values.yaml with the generated key then upgrade the deployment
 ```bash
 helm upgrade crowdsec crowdsec/crowdsec -f ~/crowdsec/crowdsec-values.yaml
@@ -229,3 +241,8 @@ helm upgrade crowdsec crowdsec/crowdsec -f ~/crowdsec/crowdsec-values.yaml
 # Apply Bouncer Middleware
 ```bash
 kubectl apply -f ~/crowdsec/bouncer-middleware.yaml
+```
+<br/>
+<br/>
+<br/>
+
