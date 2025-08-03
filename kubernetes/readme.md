@@ -19,6 +19,13 @@ qm disk resize 5000 scsi0 10G
 # Deploy new VMs by cloning the template (full clone)
 One master and one worker node per machine
 
+# Deploy K3S
+Copy k3s/k3s.sh to admin machine home directory and make it executable.
+
+Copy cloud-init id_rsa to admin machine home directory
+
+Execute the script
+
 # Install helm
 ``` bash
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
@@ -26,43 +33,119 @@ chmod 700 get_helm.sh
 ./get_helm.sh
 ```
 
+# Install Homebrew
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
 # Install Cert-Manager
 ``` bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.yaml
+brew install cmctl
+helm repo add jetstack https://charts.jetstack.io
+helm install \
+    cert-manager \
+    jetstack/cert-manager \
+    --namespace cert-manager \
+    --version v1.18.2 \
+    --values ~/cert-manager/values.yaml
+helm upgrade \
+    cert-manager \
+    jetstack/cert-manager \
+    --namespace cert-manager \
+    
+kubectl get pods --namespace cert-manager
+cmctl check api
 ```
 
-# Install Cloudflare Origin CA Issuer
-## Install Origin CA Issuer
-``` bash
-kubectl apply -f ~/cforigin/deploy/crds
-kubectl apply -f ~/cforigin/deploy/rbac
-kubectl apply -f ~/cforigin/deploy/manifests
-kubectl get -n origin-ca-issuer pod
+## End-to-end verify the installation
+```bash
+cat <<EOF > test-resources.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager-test
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: test-selfsigned
+  namespace: cert-manager-test
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: selfsigned-cert
+  namespace: cert-manager-test
+spec:
+  dnsNames:
+    - example.com
+  secretName: selfsigned-cert-tls
+  issuerRef:
+    name: test-selfsigned
+EOF
+```
+```bash
+kubectl apply -f test-resources.yaml
+kubectl describe certificate -n cert-manager-test
 ```
 
-## Adding an OriginIssuer
-### API Token
-Origin CA Issuer can use an API token that contains the “Zone / SSL and Certificates / Edit” permission, which can be scoped to specific accounts or zones.
+Status of certificate should be "Certificate issued successfully"
+
+## Clean up test resources
 ```bash
-kubectl apply -f ~/cforigin/deploy/originca/api-token-secret.yaml -f ~/cforigin/deploy/originca/api-token-issuer.yaml
-```
-Check the status of the OriginIssuer
-```bash
-kubectl get originissuer.cert-manager.k8s.cloudflare.com prodissuer -o json | jq .status.conditions
-```
-### Origin CA Key
-Use the same API key as above for the secret
-```bash
-kubectl apply -f ~/cforigin/deploy/originca/service-key-secret.yaml -f ~/cforigin/deploy/originca/service-key-issuer.yaml
-```
-Check the status of the OriginIssuer
-```bash
-kubectl get originissuer.cert-manager.k8s.cloudflare.com prodissuer -o json | jq .status.conditions
+kubectl delete -f test-resources.yaml
 ```
 
-## Create Certificates
+# Install Traefik
+## Add Helm Repos
 ```bash
-kubectl apply -f ~/cforigin/deploy/certificates
+helm repo add traefik https://traefik.github.io/charts
+helm repo add emberstack https://emberstack.github.io/helm-charts
+helm repo add crowdsec https://crowdsecurity.github.io/helm-charts
+helm repo update
+```
+## Create Traefik Namespace
+```bash
+kubectl create namespace traefik
+```
+## Install Traefik
+```bash
+helm install traefik --namespace=traefik traefik/traefik -f ~/traefik/traefik-values.yaml
+```
+## Check Traefik deployment
+```bash
+kubectl get svc -n traefik
+kubectl get pods -n traefik
+```
+## Apply Middleware
+```bash
+kubectl apply -f ~/traefik/default-headers.yaml
+```
+## Create Secret for Traefik Dashboard
+```bash
+kubectl apply -f ~/traefik/dashboard/dashboard-secret.yaml
+```
+## Apply Middleware
+```bash
+kubectl apply -f ~/traefik/dashboard/middleware.yaml
+```
+## Apply Ingress to Access Service
+```bash
+kubectl apply -f ~/traefik/dashboard/ingress.yaml
+```
+## Apply secret for certificate (Cloudflare)
+```bash
+kubectl apply -f ~/traefik/cert-manager/issuers/secret-cf-token.yaml
+```
+## Apply production certificate issuer
+```bash
+kubectl apply -f ~/traefik/cert-manager/issuers/letsencrypt-production.yaml
+```
+## Apply production certificate
+```bash
+kubectl apply -f ~/traefik/cert-manager/certificates/production/dylangroffcomtls.yaml
 ```
 
 # Install Rancher 
@@ -70,6 +153,11 @@ kubectl apply -f ~/cforigin/deploy/certificates
 ```bash
 helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
 kubectl create namespace cattle-system
+```
+
+## Create Rancher Certificate
+```bash
+kubectl apply -f ~/rancher/tls-rancher-ingress.yaml
 ```
 
 # Install Rancher
@@ -97,45 +185,11 @@ kubectl get svc -n cattle-system
 
 # Go to Rancher GUI
 
-# Install Traefik
-## Add Helm Repos
-```bash
-helm repo add traefik https://traefik.github.io/charts
-helm repo add emberstack https://emberstack.github.io/helm-charts
-helm repo add crowdsec https://crowdsecurity.github.io/helm-charts
-helm repo update
-```
+# Install Crowdsec
 ## Install Emberstack
 ```bash
-helm install reflector emberstack/reflector -f ~/reflector/reflector-values.yaml
-```
-## Install Traefik
-```bash
-helm install traefik traefik/traefik -f ~/traefik/traefik-values.yaml
-```
-## Check Traefik deployment
-```bash
-kubectl get svc
-kubectl get pods
-```
-## Apply Middleware
-```bash
-kubectl apply -f ~/traefik/default-headers.yaml
-```
-## Create Secret for Traefik Dashboard
-```bash
-kubectl apply -f ~/traefik/dashboard/dashboard-secret.yaml
-```
-## Apply Middleware
-```bash
-kubectl apply -f ~/traefik/dashboard/middleware.yaml
-```
-## Apply Ingress to Access Service
-```bash
-kubectl apply -f ~/traefik/dashboard/ingress.yaml
-```
-
-# Install Crowdsec 
+helm install reflector --namespace=reflector emberstack/reflector -f ~/reflector/reflector-values.yaml
+``` 
 ## READ ALL OF THIS FIRST!!
 ```bash
 helm install crowdsec crowdsec/crowdsec -f ~/traefik/crowdsec-values.yaml

@@ -28,11 +28,6 @@ ports:
     tls:
       enabled: true
 
-tlsStore:
-  default:
-    defaultCertificate:
-      secretName: dylangroffcomtls
-
 ingressRoute:
   dashboard:
     enabled: false
@@ -40,7 +35,7 @@ ingressRoute:
 providers:
   kubernetesCRD:
     enabled: true
-    ingressClass: traefikexternal
+    ingressClass: traefik-external
     allowExternalNameServices: true
   kubernetesIngress:
     enabled: true
