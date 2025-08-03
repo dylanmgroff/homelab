@@ -15,17 +15,26 @@ qm set 5000 --serial0 socket --vga serial0
 qm disk resize 5000 scsi0 10G
 ```
 ## Create the Cloud-Init template 
-
+#
+#
+#
+#
 # Deploy new VMs by cloning the template (full clone)
 One master and one worker node per machine
-
+#
+#
+#
+#
 # Deploy K3S
 Copy k3s/k3s.sh to admin machine home directory and make it executable.
 
 Copy cloud-init id_rsa to admin machine home directory
 
 Execute the script
-
+#
+#
+#
+#
 # Install helm
 ``` bash
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
@@ -192,6 +201,7 @@ kubectl apply -f ~/traefik/cert-manager/issuers/letsencrypt-production.yaml
 ## Apply production certificate
 ```bash
 kubectl apply -f ~/traefik/cert-manager/certificates/production/dylangroffcomtls.yaml
+kubectl apply -f ~/traefik/cert-manager/certificates/production/manlydylangroffcomtls.yaml
 ```
 Then just wait for the certificate to be issued! Be patient!!
 
@@ -204,7 +214,7 @@ helm install reflector --namespace=reflector emberstack/reflector -f ~/reflector
 ``` 
 ## READ ALL OF THIS FIRST!!
 ```bash
-helm install crowdsec crowdsec/crowdsec -f ~/traefik/crowdsec-values.yaml
+helm install crowdsec crowdsec/crowdsec -f ~/crowdsec/crowdsec-values.yaml
 ```
 ## Right away drop in the next command, find the container code and replace the <> then drop in that command. It will spit out a registry code.
 ```bash
@@ -214,7 +224,7 @@ kubectl exec -it crowdsec-lapi-<> -- cscli bouncers add traefik-bouncer
 
 # Update crowdsec-values.yaml with the generated key then upgrade the deployment
 ```bash
-helm upgrade crowdsec crowdsec/crowdsec -f ~/traefik/crowdsec-values.yaml
+helm upgrade crowdsec crowdsec/crowdsec -f ~/crowdsec/crowdsec-values.yaml
 ```
 # Apply Bouncer Middleware
 ```bash

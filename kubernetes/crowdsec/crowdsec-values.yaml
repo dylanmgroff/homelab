@@ -49,13 +49,13 @@ lapi:
     - name: DISABLE_ONLINE_API
       value: "false"
     - name: ENROLL_KEY
-      value: "cls1bg0kr0000l808r9j9wwup"
+      value: ""
     - name: ENROLL_INSTANCE_NAME
       value: "manlykube"
     - name: ENROLL_TAGS
       value: "homelab"
     - name: BOUNCER_KEY_manlykube
-      value: "PQ0YauU4IH/BDyfQETonNWAZKzs/41fzFFWOsGFUZns"
+      value: ""
   nodeSelector: 
     worker: "true"
 image:

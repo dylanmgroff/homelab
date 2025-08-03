@@ -2,14 +2,14 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: dylangroff
+  name: manlydylangroff
   namespace: traefik
 spec:
-  secretName: dylangroff-tls-production
+  secretName: manly-dylangroff-tls-production
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
-  commonName: "*.dylangroff.com"
+  commonName: "*.manly.dylangroff.com"
   dnsNames:
-  - "*.dylangroff.com"
-  - dylangroff.com
+  - "*.manly.dylangroff.com"
+  - manly.dylangroff.com

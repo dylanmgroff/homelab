@@ -18,4 +18,4 @@ spec:
         - name: api@internal
           kind: TraefikService
   tls:
-    secretName: dylangroff-tls-production
+    secretName: manly-dylangroff-tls-production
