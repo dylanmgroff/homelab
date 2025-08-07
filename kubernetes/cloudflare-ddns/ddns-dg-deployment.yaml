@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: ddns-dg
   labels:
     app: ddns-dg
-  name: ddns-dg
 spec:
   replicas: 1
   selector:
@@ -31,11 +31,4 @@ spec:
               value: montreal
             - name: ZONE
               value: dylangroff.com
-          livenessProbe:
-            exec:
-              command:
-              - cat
-              - /config/cloudflare.conf
-            initialDelaySeconds: 5
-            periodSeconds: 5
       restartPolicy: Always
