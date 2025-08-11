@@ -1,0 +1,202 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ncdg-app
+  name: ncdg-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ncdg-app
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ncdg-app
+    spec:
+      containers:
+        - env:
+            - name: MAIL_DOMAIN
+              value: dylangroff.com
+            - name: MAIL_FROM_ADDRESS
+              value: noreply
+            - name: MYSQL_DATABASE
+              value: nextcloud
+            - name: MYSQL_HOST
+              value: db
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ncdg-sql-password
+                  key: mysql-password
+            - name: MYSQL_USER
+              value: nextcloud
+            - name: NEXTCLOUD_INIT_HTACCESS
+              value: "true"
+            - name: NEXTCLOUD_TURSTED_DOMAINS
+              value: localhost files.dylangroff.com
+            - name: PHP_MEMORY_LIMIT
+              value: 2G
+            - name: PHP_UPLOAD_LIMIT
+              value: 16G
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_HOST_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ncdg-redis-password
+                  key: redis-password
+            - name: SMTP_HOST
+              value: smtp.purelymail.com
+            - name: SMTP_NAME
+              value: noreply@dylangroff.com
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ncdg-smtp-password
+                  key: smtp-password
+            - name: SMTP_PORT
+              value: "465"
+            - name: SMTP_SECURE
+              value: ssl
+            - name: TZ
+              value: America/Toronto
+          image: nextcloud
+          name: nc-dg-app
+          volumeMounts:
+            - mountPath: /var/www/html
+              name: ncdg-config
+            - mountPath: /ext/Client Postings
+              name: ncdg-clientPostings
+            - mountPath: /ext/Client Uploads
+              name: ncdg-clientUploads
+            - mountPath: /ext/Documents
+              name: ncdg-documents
+            - mountPath: /ext/Installers
+              name: ncdg-installers
+            - mountPath: /ext/Media
+              name: ncdg-media
+            - mountPath: /ext/Work Archive
+              name: ncdg-workArchive
+      restartPolicy: Always
+      volumes:
+        - name: ncdg-config
+          persistentVolumeClaim:
+            claimName: ncdg-config
+        - name: ncdg-clientPostings
+          persistentVolumeClaim:
+            claimName: ncdg-clientPostings
+        - name: ncdg-clientUploads
+          persistentVolumeClaim:
+            claimName: ncdg-clientUploads
+        - name: ncdg-documents
+          persistentVolumeClaim:
+            claimName: ncdg-documents
+        - name: ncdg-installers
+          persistentVolumeClaim:
+            claimName: ncdg-installers
+        - name: ncdg-media
+          persistentVolumeClaim:
+            claimName: ncdg-media
+        - name: ncdg-workArchive
+          persistentVolumeClaim:
+            claimName: ncdg-workArchive
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ncdg-db
+  labels:
+    app: ncdg-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ncdg-db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ncdg-db
+    spec:
+      containers:
+        - args:
+            - --transaction-isolation=READ-COMMITTED
+            - --log-bin=binlog
+            - --binlog-format=ROW
+          env:
+            - name: MYSQL_DATABASE
+              value: nextcloud
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ncdg-sql-password
+                  key: mysql-password
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ncdg-sql-rootpassword
+                  key: mysql-rootpassword
+            - name: MYSQL_USER
+              value: nextcloud
+          image: mariadb:latest
+          name: ncdg-mysql
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: ncdg-db
+      restartPolicy: Always
+      volumes:
+        - name: ncdg-db
+          persistentVolumeClaim:
+            claimName: ncdg-db
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ncdg-redis
+  labels:
+    app: ncdg-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ncdg-redis
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ncdg-redis
+    spec:
+      containers:
+        - args:
+            - redis-server
+            - --requirepass
+            - $(REDIS_HOST_PASSWORD)
+          env:
+            - name: REDIS_DATABASES
+              value: "16"
+            - name: REDIS_HOST_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ncdg-redis-password
+                  key: redis-password
+          image: redis:latest
+          name: ncdg-redis
+          volumeMounts:
+            - mountPath: /data
+              name: ncdg-redis-data
+            - mountPath: /usr/local/etc/redis
+              name: ncdg-redis-conf
+      restartPolicy: Always
+      volumes:
+        - name: ncdg-redis-data
+          persistentVolumeClaim:
+            claimName: ncdg-redis-data
+        - name: ncdg-redis-conf
+          persistentVolumeClaim:
+            claimName: ncdg-redis-conf
