@@ -68,42 +68,49 @@ spec:
           name: nc-dg-app
           volumeMounts:
             - mountPath: /var/www/html
+              readonly: false
               name: ncdg-config
             - mountPath: /ext/Client Postings
-              name: ncdg-clientPostings
+              readonly: false
+              name: smb-clientPostings
             - mountPath: /ext/Client Uploads
-              name: ncdg-clientUploads
+              readonly: false
+              name: smb-clientUploads
             - mountPath: /ext/Documents
-              name: ncdg-documents
+              readonly: false
+              name: smb-documents
             - mountPath: /ext/Installers
-              name: ncdg-installers
+              readonly: false
+              name: smb-installers
             - mountPath: /ext/Media
-              name: ncdg-media
+              readonly: false
+              name: smb-media
             - mountPath: /ext/Work Archive
-              name: ncdg-workArchive
+              readonly: false
+              name: smb-workArchive
       restartPolicy: Always
       volumes:
         - name: ncdg-config
           persistentVolumeClaim:
-            claimName: ncdg-config
-        - name: ncdg-clientPostings
+            claimName: pvc-ncdg-config
+        - name: smb-clientPostings
           persistentVolumeClaim:
-            claimName: ncdg-clientPostings
-        - name: ncdg-clientUploads
+            claimName: pvc-smb-ncdg-clientPostings
+        - name: smb-clientUploads
           persistentVolumeClaim:
-            claimName: ncdg-clientUploads
-        - name: ncdg-documents
+            claimName: pvc-smb-ncdg-clientUploads
+        - name: smb-documents
           persistentVolumeClaim:
             claimName: ncdg-documents
-        - name: ncdg-installers
+        - name: smb-installers
           persistentVolumeClaim:
-            claimName: ncdg-installers
-        - name: ncdg-media
+            claimName: pvc-smb-ncdg-installers
+        - name: smb-media
           persistentVolumeClaim:
-            claimName: ncdg-media
-        - name: ncdg-workArchive
+            claimName: pvc-smb-ncdg-media
+        - name: smb-workArchive
           persistentVolumeClaim:
-            claimName: ncdg-workArchive
+            claimName: pvc-smb-ncdg-workArchive
 ---
 apiVersion: apps/v1
 kind: Deployment
