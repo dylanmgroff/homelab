@@ -72,45 +72,30 @@ spec:
               name: ncdg-config
             - mountPath: /ext/Client Postings
               readonly: false
-              name: smb-clientPostings
+              name: smb
             - mountPath: /ext/Client Uploads
               readonly: false
-              name: smb-clientUploads
+              name: smb
             - mountPath: /ext/Documents
               readonly: false
-              name: smb-documents
+              name: smb
             - mountPath: /ext/Installers
               readonly: false
-              name: smb-installers
+              name: smb
             - mountPath: /ext/Media
               readonly: false
-              name: smb-media
+              name: smb
             - mountPath: /ext/Work Archive
               readonly: false
-              name: smb-workArchive
+              name: smb
       restartPolicy: Always
       volumes:
         - name: ncdg-config
           persistentVolumeClaim:
             claimName: pvc-ncdg-config
-        - name: smb-clientPostings
+        - name: smb
           persistentVolumeClaim:
             claimName: pvc-smb-ncdg-clientPostings
-        - name: smb-clientUploads
-          persistentVolumeClaim:
-            claimName: pvc-smb-ncdg-clientUploads
-        - name: smb-documents
-          persistentVolumeClaim:
-            claimName: ncdg-documents
-        - name: smb-installers
-          persistentVolumeClaim:
-            claimName: pvc-smb-ncdg-installers
-        - name: smb-media
-          persistentVolumeClaim:
-            claimName: pvc-smb-ncdg-media
-        - name: smb-workArchive
-          persistentVolumeClaim:
-            claimName: pvc-smb-ncdg-workArchive
 ---
 apiVersion: apps/v1
 kind: Deployment
