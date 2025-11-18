@@ -8,4 +8,5 @@
 1. Install Crowdsec
 1. Install Longhorn
 1. Install PiHole
-1. Map SMB Shares to Pods
+1. Install SMB CSI Driver
+1. Insatll Nextcloud
