@@ -1,10 +1,14 @@
 ---
+######
+# Nextcloud Deployment
+######
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     app: ncdg-app
   name: ncdg-app
+  namespace: nextcloud
 spec:
   replicas: 1
   selector:
@@ -26,7 +30,7 @@ spec:
             - name: MYSQL_DATABASE
               value: nextcloud
             - name: MYSQL_HOST
-              value: db
+              value: ncdg-db
             - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -36,19 +40,12 @@ spec:
               value: nextcloud
             - name: NEXTCLOUD_INIT_HTACCESS
               value: "true"
-            - name: NEXTCLOUD_TURSTED_DOMAINS
+            - name: NEXTCLOUD_TRUSTED_DOMAINS
               value: localhost files.dylangroff.com
             - name: PHP_MEMORY_LIMIT
               value: 2G
             - name: PHP_UPLOAD_LIMIT
               value: 16G
-            - name: REDIS_HOST
-              value: redis
-            - name: REDIS_HOST_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: ncdg-redis-password
-                  key: redis-password
             - name: SMTP_HOST
               value: smtp.purelymail.com
             - name: SMTP_NAME
@@ -64,45 +61,103 @@ spec:
               value: ssl
             - name: TZ
               value: America/Toronto
+            - name: TRUSTED_PROXIES
+              value: 10.42.4.0/24
+            - name: OVERWRITEHOST
+              value: files.dylangroff.com
+            - name: OVERWRITEPROTOCOL
+              value: https
           image: nextcloud
           name: nc-dg-app
           volumeMounts:
             - mountPath: /var/www/html
-              readonly: false
+              readOnly: false
               name: ncdg-config
-            - mountPath: /ext/Client Postings
-              readonly: false
-              name: smb
-            - mountPath: /ext/Client Uploads
-              readonly: false
-              name: smb
-            - mountPath: /ext/Documents
-              readonly: false
-              name: smb
-            - mountPath: /ext/Installers
-              readonly: false
-              name: smb
-            - mountPath: /ext/Media
-              readonly: false
-              name: smb
-            - mountPath: /ext/Work Archive
-              readonly: false
-              name: smb
+            # - mountPath: "/ext/Client Postings"
+            #   readOnly: false
+            #   name: smb
+            #   subPath: 'Client Postings'
+            # - mountPath: "/ext/Client Uploads"
+            #   readOnly: false
+            #   name: smb
+            #   subPath: 'Client Uploads'
+            - mountPath: "/ext/Documents"
+              readOnly: false
+              name: smb-documents
+              subPath: Documents
+            # - mountPath: "/ext/Installers"
+            #   readOnly: false
+            #   name: smb
+            #   subPath: Installers
+            # - mountPath: "/ext/Media"
+            #   readOnly: false
+            #   name: smb
+            #   subPath: Media
+            # - mountPath: "/ext/Work Archive"
+            #   readOnly: false
+            #   name: smb
+            #   subPath: 'Work Archive'
       restartPolicy: Always
       volumes:
         - name: ncdg-config
           persistentVolumeClaim:
-            claimName: pvc-ncdg-config
-        - name: smb
+            claimName: ncdg-config
+        - name: smb-documents
           persistentVolumeClaim:
-            claimName: pvc-smb-ncdg-clientPostings
+            claimName: pvc-nextcloud-smb-documents
 ---
+######
+# Nextcloud Service
+######
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ncdg-app
+  name: ncdg-app
+  namespace: nextcloud 
+spec:
+  ports:
+  - name: container-http-tcp
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: container-https-tcp
+    port: 8443
+    protocol: UDP
+    targetPort: 8443
+  - name: nextcloud-http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  - name: nextcloud-https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  - name: turnserver-tcp
+    port: 3478
+    protocol: TCP
+    targetPort: 3478
+  - name: turnserver-udp
+    port: 3478
+    protocol: UDP
+    targetPort: 3478
+  selector:
+    app: ncdg-app
+  externalTrafficPolicy: Local
+  loadBalancerIP: 10.9.50.80
+  type: LoadBalancer
+---
+###### 
+# Maria DB 
+######
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ncdg-db
   labels:
     app: ncdg-db
+  namespace: nextcloud
 spec:
   replicas: 1
   selector:
@@ -120,6 +175,8 @@ spec:
             - --transaction-isolation=READ-COMMITTED
             - --log-bin=binlog
             - --binlog-format=ROW
+          ports:
+            - containerPort: 3306
           env:
             - name: MYSQL_DATABASE
               value: nextcloud
@@ -135,7 +192,7 @@ spec:
                   key: mysql-rootpassword
             - name: MYSQL_USER
               value: nextcloud
-          image: mariadb:latest
+          image: mariadb:11.8
           name: ncdg-mysql
           volumeMounts:
             - mountPath: /var/lib/mysql
@@ -146,49 +203,86 @@ spec:
           persistentVolumeClaim:
             claimName: ncdg-db
 ---
-apiVersion: apps/v1
-kind: Deployment
+###### 
+# Nextcloud Ingress 
+######
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
 metadata:
-  name: ncdg-redis
-  labels:
-    app: ncdg-redis
+  name: ncdg-app
+  namespace: nextcloud
+  annotations: 
+    kubernetes.io/ingress.class: traefik-external
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: ncdg-redis
-  strategy:
-    type: Recreate
-  template:
-    metadata:
-      labels:
-        app: ncdg-redis
-    spec:
-      containers:
-        - args:
-            - redis-server
-            - --requirepass
-            - $(REDIS_HOST_PASSWORD)
-          env:
-            - name: REDIS_DATABASES
-              value: "16"
-            - name: REDIS_HOST_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: ncdg-redis-password
-                  key: redis-password
-          image: redis:latest
-          name: ncdg-redis
-          volumeMounts:
-            - mountPath: /data
-              name: ncdg-redis-data
-            - mountPath: /usr/local/etc/redis
-              name: ncdg-redis-conf
-      restartPolicy: Always
-      volumes:
-        - name: ncdg-redis-data
-          persistentVolumeClaim:
-            claimName: ncdg-redis-data
-        - name: ncdg-redis-conf
-          persistentVolumeClaim:
-            claimName: ncdg-redis-conf
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`www.files.dylangroff.com`)
+      kind: Rule
+      services:
+        - name: ncdg-app
+          port: 80
+    - match: Host(`files.dylangroff.com`)
+      kind: Rule
+      services:
+        - name: ncdg-app
+          port: 80
+      middlewares:
+        - name: nextcloud-headers
+        - name: nextcloud-https-redirect 
+        - name: nextcloud-regex
+  tls:
+    secretName: manly-dylangroff-com-tls
+---
+######
+# Nextcloud Headers Middleware
+######
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: nextcloud-headers
+  namespace: nextcloud
+spec:
+  headers:
+    frameDeny: true
+    sslRedirect: true
+    browserXssFilter: true
+    #Instructs some browsers to not sniff the mimetype of files. This is used for example to prevent browsers from interpreting text files as JavaScript.
+    contentTypeNosniff: true
+    #HSTS
+    stsIncludeSubdomains: true
+    stsPreload: true
+    stsSeconds: 31536000
+    forceSTSHeader: true
+    #X-Frame-Options,
+    #Prevents embedding of the instance within an iframe from other domains to prevent Clickjacking and other similar attacks.#Instructs some browsers to not sniff the mimetype of files. This is used for example to prevent browsers from interpreting text files as JavaScript.
+    customFrameOptionsValue: SAMEORIGIN
+    referrerPolicy: "no-referrer"
+    customRequestHeaders:
+      X-Forwarded-Proto: https
+---
+######
+# Nextcloud HTTPS Redirect Middleware
+######
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: nextcloud-https-redirect
+  namespace: nextcloud
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
+######
+# Nextcloud WEBdav Regex
+######
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: nextcloud-regex
+  namespace: nextcloud
+spec:
+  redirectRegex:
+    regex: "https://(.*)/.well-known/(card|cal)dav"
+    replacement: "https:///remote.php/dav/"
