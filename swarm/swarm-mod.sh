@@ -1,0 +1,139 @@
+#!/bin/bash
+
+# Set the IP addresses of the admin, managers, and workers nodes
+admin=10.9.50.5
+manager1=10.9.50.21
+manager2=10.9.50.22
+manager3=10.9.50.23
+worker1=10.9.50.24
+worker2=10.9.50.25
+worker3=10.9.50.26
+
+# Set the workers' hostnames (if using cloud-init in Proxmox it's the name of the VM)
+workerHostname1=dockerSwarm-w01
+workerHostname2=dockerSwarm-w02
+workerHostname3=dockerSwarm-w03
+
+# User of remote machines
+user=dylangroff
+
+# Interface used on remotes
+interface=eth0
+
+# Array of all manager nodes
+allmanagers=($manager1 $manager2 $manager3)
+
+# Array of extra managers
+managers=($manager2 $manager3)
+
+# Array of worker nodes
+workers=($worker1 $worker2 $worker3)
+
+# Array of all
+all=($manager1 $manager2 $manager3 $worker1 $worker2 $worker3)
+
+#ssh certificate name variable
+certName=manlyswarm
+
+#############################################
+#            DO NOT EDIT BELOW              #
+#############################################
+# For testing purposes - in case time is wrong due to VM snapshots
+sudo timedatectl set-ntp off
+sudo timedatectl set-ntp on
+
+# Move SSH certs to ~/.ssh and change permissions
+cp /home/$user/{$certName,$certName.pub} /home/$user/.ssh
+chmod 600 /home/$user/.ssh/$certName 
+chmod 644 /home/$user/.ssh/$certName.pub
+
+# Create SSH Config file to ignore checking (don't use in production!)
+echo "StrictHostKeyChecking no" > ~/.ssh/config
+
+#add ssh keys for all nodes
+for node in "${all[@]}"; do
+  ssh-copy-id $user@$node
+done
+
+# Copy SSH keys to MN1 to copy tokens back later
+scp -i /home/$user/.ssh/$certName /home/$user/$certName $user@$manager1:~/.ssh
+scp -i /home/$user/.ssh/$certName /home/$user/$certName.pub $user@$manager1:~/.ssh
+
+
+# Install dependencies for each node (Docker, GlusterFS)
+for newnode in "${all[@]}"; do
+  ssh $user@$newnode -i ~/.ssh/$certName sudo su <<EOF
+  iptables -F    
+  iptables -P INPUT ACCEPT  
+  apt-get update
+  NEEDRESTART_MODE=a apt install software-properties-common glusterfs-server -y
+  systemctl start glusterd
+  systemctl enable glusterd
+  mkdir -p /gluster/volume1
+  exit
+EOF
+  echo -e " \033[32;5m$newnode - Docker & GlusterFS installed!\033[0m"
+done
+
+# Step 1: Create Swarm on first node
+ssh -tt $user@$manager1 -i ~/.ssh/$certName sudo su <<EOF
+docker swarm init --advertise-addr $manager1
+docker swarm join-token manager | sed -n 3p | grep -Po 'docker swarm join --token \\K[^\\s]*' > manager.txt
+docker swarm join-token worker | sed -n 3p | grep -Po 'docker swarm join --token \\K[^\\s]*' > worker.txt
+echo "StrictHostKeyChecking no" > ~/.ssh/config
+ssh-copy-id -i /home/$user/.ssh/$certName $user@$admin
+scp -i /home/$user/.ssh/$certName /home/$user/manager.txt $user@$admin:~/manager
+scp -i /home/$user/.ssh/$certName /home/$user/worker.txt $user@$admin:~/worker
+exit
+EOF
+echo -e " \033[32;5mManager1 Completed\033[0m"
+
+# Step 2: Set variables
+managerToken=`cat manager`
+workerToken=`cat worker`
+
+# Step 3: Connect additional managers
+for newnode in "${managers[@]}"; do
+  ssh -tt $user@$newnode -i ~/.ssh/$certName sudo su <<EOF
+  docker swarm join \
+  --token  $managerToken \
+  $manager1
+  exit
+EOF
+  echo -e " \033[32;5m$newnode - Manager node joined successfully!\033[0m"
+done
+
+# Step 4: Connect additional worker
+for newnode in "${workers[@]}"; do
+  ssh -tt $user@$newnode -i ~/.ssh/$certName sudo su <<EOF
+  docker swarm join \
+  --token  $workerToken \
+  $manager1
+  exit
+EOF
+  echo -e " \033[32;5m$newnode - Worker node joined successfully!\033[0m"
+done
+
+# Step 5: Create GlusterFS Cluster across all nodes (connect to Manager1) - we will also label our nodes to restrict deployment of services to workers only
+ssh -tt $user@$manager1 -i ~/.ssh/$certName sudo su <<EOF
+gluster peer probe $manager1; gluster peer probe $manager2; gluster peer probe $manager3; gluster peer probe $worker1; gluster peer probe $worker2; gluster peer probe $worker3;
+gluster volume create staging-gfs replica 5 $manager1:/gluster/volume1 $manager2:/gluster/volume1 $manager3:/gluster/volume1 $worker1:/gluster/volume1 $worker2:/gluster/volume1 $worker3:/gluster/volume1 force
+gluster volume start staging-gfs
+chmod 666 /var/run/docker.sock
+docker node update --label-add worker=true $workerHostname1
+docker node update --label-add worker=true $workerHostname2
+docker node update --label-add worker=true $workerHostname3
+exit
+EOF
+echo -e " \033[32;5mGlusterFS created\033[0m"
+
+# Step 6: Connect to all machines to ensure that GlusterFS mount restarts after boot
+for newnode in "${all[@]}"; do
+  ssh $user@$newnode -i ~/.ssh/$certName sudo su <<EOF
+  echo 'localhost:/staging-gfs /mnt glusterfs defaults,_netdev,backupvolfile-server=localhost 0 0' >> /etc/fstab
+  mount.glusterfs localhost:/staging-gfs /mnt
+  chown -R root:docker /mnt
+  exit
+EOF
+  echo -e " \033[32;5m$newnode - GlusterFS mounted on reboot\033[0m"
+done
