@@ -87,13 +87,13 @@ Create one Admin VM on any node.
 
 Assign a static IP for each VM in the Unifi console using the VM MAC Address. IP assignments per below from swarm.sh
 
-admin       10.9.50.5
-manager1    10.9.50.21
-manager2    10.9.50.22
-manager3    10.9.50.23
-worker1     10.9.50.24
-worker2     10.9.50.25
-worker3     10.9.50.26
+admin       10.9.50.5</br>
+manager1    10.9.50.21</br>
+manager2    10.9.50.22</br>
+manager3    10.9.50.23</br>
+worker1     10.9.50.24</br>
+worker2     10.9.50.25</br>
+worker3     10.9.50.26</br>
 
 # Install Docker on Node
 ```bash
