@@ -81,7 +81,19 @@ Right click the VM and select "convert to template"
 # Deploy Nodes
 Whe it comes time to deploy select "Clone Template" and set the mode to "Full Clone".
 
-Create a master and worker node on each host machine using the cloud-init Template
+Create a Master and Worder VM on each node.
+
+Create one Admin VM on any node.
+
+Assign a static IP for each VM in the Unifi console using the VM MAC Address. IP assignments per below from swarm.sh
+
+admin       10.9.50.5
+manager1    10.9.50.21
+manager2    10.9.50.22
+manager3    10.9.50.23
+worker1     10.9.50.24
+worker2     10.9.50.25
+worker3     10.9.50.26
 
 # Install Docker on Node
 ```bash
@@ -105,6 +117,12 @@ sudo apt update
 
 sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+sudo shutdown -r now
+
 sudo systemctl status docker
+
+^C
 ```
 
+# Deploy Swarm
+copy swarm.sh to admin node
