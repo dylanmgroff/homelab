@@ -38,28 +38,15 @@ We then CD into the folder where we'll find the ISO we downloaded earlier. We ca
 On these hosts the local storage name is left as default and so we point it to "local-lvm".
 
 ```bash
+# Creates a virtual hard disk at scsi0.
 qm set 5000 --scsihw virtio-scsi-pci --scsi0 local:vm-5000-disk-0
-```
-
-This command creates a virtual hard disk at scsi0.
-
-```bash
+# This command creates a virtual CD drive for the cloud-init assets.
 qm set 5000 --ide2 local:cloudinit
-```
-
-This command creates a virtual CD drive for the cloud-init assets.
-
-```bash
+# This command sets the VM to boot from scsi0 that we created earlier.
 qm set 5000 --boopt c --bootdisk scsi0
-```
-
-This command sets the VM to boot from scsi0 that we created earlier.
-
-```bash
+# This command creates a serial port so we can login through VNC in proxmox as a failsafe in case we lose SSH access.
 qm set 5000 --serial0 socket --vga serial0
 ```
-
-This command creates a serial port so we can login through VNC in proxmox as a failsafe in case we lose SSH access.
 
 You can now go into the cloud-init template and edit the template as needed.
 
@@ -95,11 +82,11 @@ worker1     10.9.50.24</br>
 worker2     10.9.50.25</br>
 worker3     10.9.50.26</br>
 
-# Install Docker on Node
+# Install Docker
+## Install on each VM
 ```bash
 # Add Docker's official GPG key:
 sudo apt update && sudo apt install ca-certificates curl && sudo install -m 0755 -d /etc/apt/keyrings && sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && sudo chmod a+r /etc/apt/keyrings/docker.asc
-
 # Add the repository to Apt sources:
 sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
 Types: deb
@@ -108,25 +95,26 @@ Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
 Components: stable
 Signed-By: /etc/apt/keyrings/docker.asc
 EOF
-
+# install docker and other relevant components
 sudo apt update && sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
 # wait for docker install to complete and then reboot the system
-
 sudo shutdown -r now
-
 # when the system is back up check that docker is running
-
 sudo systemctl status docker
-
 # if docker is running you can kill the process
-
 ^C
-
 # run hello world to validate docker install
-
 docker run hello-world
 ```
 
-# Deploy Swarm
-copy swarm.sh to admin node
+# Install GlusterFS
+## Install on each VM
+
+```bash
+# switch to super user
+sudo su
+# install glusterfs, start glusterd, enable glusterd, make gluster volume directory
+apt install software-properties-common glusterfs-server -y && systemctl start glusterd && systemctl enable glusterd && mkdir -p /gluster/volume1
+# exit super user
+exit
+```
