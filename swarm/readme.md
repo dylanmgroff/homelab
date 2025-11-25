@@ -1,4 +1,4 @@
-## Install Proxmox as OS on host machine
+# Install Proxmox as OS on host machine
 1.  Download the ISO
     https://www.proxmox.com/en/downloads/proxmox-virtual-environment/iso
 
@@ -12,8 +12,8 @@
 1. Boot to the USB drive and follow the prompts</br>
     Once installation is complete you'll be dropped into the command line with the host IP and port specified
 
-## Create a Proxmox Cloud-Init Template
-### Create the Template
+# Create a Proxmox Cloud-Init Template
+## Create the Template
 1.  Download the Ubuntu Server ISO using the GUI
     https://ubuntu.com/download/server
 
@@ -65,7 +65,7 @@ You can now go into the cloud-init template and edit the template as needed.
 
 For example you can change the hardware to allocate a different number of cores, or more memory.
 
-### Set the Cloud Init Parameters
+## Set the Cloud Init Parameters
 1. Set the username and password
 1. Add your SSH key
 
@@ -75,12 +75,10 @@ Find the id_rsa and id_rsa.pub on the Proxmox host in ~/.ssh
 
 Add the Public SSH key to the cloud-init template
 
-### Convert to Template
+## Convert to Template
 Right click the VM and select "convert to template"
 
-### Deploy
+# Deploy Nodes
 Whe it comes time to deploy select "Clone Template" and set the mode to "Full Clone".
 
 ## Create a master and worker node on each host machine using the cloud-init Template
-
-## Install CEPH onto each node
