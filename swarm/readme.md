@@ -119,7 +119,13 @@ sudo shutdown -r now
 
 sudo systemctl status docker
 
+# if docker is running you can kill the process
+
 ^C
+
+# run hello world to validate docker install
+
+docker run hello-world
 ```
 
 # Deploy Swarm
