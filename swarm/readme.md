@@ -1,3 +1,15 @@
+# General
+
+to restart the service you can identify what's running with
+```bash
+sudo docker service ls
+```
+
+then restart the service with
+```bash
+sudo docker service update --force $serviceName
+```
+
 # Install Proxmox as OS on host machine
 1.  Download the ISO
     https://www.proxmox.com/en/downloads/proxmox-virtual-environment/iso
@@ -82,39 +94,85 @@ worker1     10.9.50.24</br>
 worker2     10.9.50.25</br>
 worker3     10.9.50.26</br>
 
-# Install Docker
-## Install on each VM
+# Automated Install from Script
+Copy swarm.sh and SSH keys to admin node. Make swarm.sh executable. Execute.
+
+# Manual Install
+## Install Docker
+### Repeat this on each VM
 ```bash
+# switch to super user
+sudo su
 # Add Docker's official GPG key:
-sudo apt update && sudo apt install ca-certificates curl && sudo install -m 0755 -d /etc/apt/keyrings && sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+apt update && sudo apt install ca-certificates curl && sudo install -m 0755 -d /etc/apt/keyrings && sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && sudo chmod a+r /etc/apt/keyrings/docker.asc
+
 # Add the repository to Apt sources:
-sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+tee /etc/apt/sources.list.d/docker.sources <<EOF
 Types: deb
 URIs: https://download.docker.com/linux/ubuntu
 Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
 Components: stable
 Signed-By: /etc/apt/keyrings/docker.asc
 EOF
+
 # install docker and other relevant components
-sudo apt update && sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+apt update && sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
 # wait for docker install to complete and then reboot the system
-sudo shutdown -r now
+shutdown -r now
+
 # when the system is back up check that docker is running
 sudo systemctl status docker
+
 # if docker is running you can kill the process
 ^C
+
 # run hello world to validate docker install
-docker run hello-world
+sudo docker run hello-world
 ```
 
-# Install GlusterFS
-## Install on each VM
-
+## Install GlusterFS
+### repeat this on each VM
 ```bash
 # switch to super user
 sudo su
+
 # install glusterfs, start glusterd, enable glusterd, make gluster volume directory
 apt install software-properties-common glusterfs-server -y && systemctl start glusterd && systemctl enable glusterd && mkdir -p /gluster/volume1
+
 # exit super user
 exit
+```
+
+## Create GlusterFS Cluster across all nodes
+### ssh to swarmm01
+```bash
+# Add each VM to peer list
+gluster peer probe 10.9.50.21; gluster peer probe 10.9.50.22; gluster peer probe 10.9.50.23; gluster peer probe 10.9.50.24; gluster peer probe 10.9.50.25; gluster peer probe 10.9.50.26;
+
+# Create gluster volumes
+gluster volume create staging-gfs replica 6 10.9.50.21:/gluster/volume1 10.9.50.22:/gluster/volume1 10.9.50.23:/gluster/volume1 10.9.50.24:/gluster/volume1 10.9.50.25:/gluster/volume1 10.9.50.26:/gluster/volume1 force
+
+# Start gluster service
+gluster volume start staging-gfs
+
+# change permissions to give access to docker socket
+chmod 666 /var/run/docker.sock
+
+# update labels for worker nodes
+docker node update --label-add worker=true dockerSwarm-w01 && docker node update --label-add worker=true dockerSwarm-w02 && docker node update --label-add worker=true dockerSwarm-w03
+
+#exit super user
+exit
+```
+
+## Ensure GlusterFS mount restarts after boot
+### Repeat on each VM
+```bash
+sudo su
+echo '127.0.0.1:/staging-gfs /mnt glusterfs defaults,_netdev,backupvolfile-server=127.0.0.1 0 0' >> /etc/fstab
+mount.glusterfs 127.0.0.1:/staging-gfs /mnt
+chown -R root:docker /mnt
+shutdown -r now
 ```
