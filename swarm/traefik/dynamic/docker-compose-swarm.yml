@@ -1,0 +1,74 @@
+services:
+  traefik:
+    image: traefik:v3.4
+
+    networks:
+      - traefik_proxy
+
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - type: bind
+        source: mnt/Traefik/certs
+        target: /certs:ro
+      - type: bind
+        source: mnt/Traefik/dynamic
+        target: /dynamic:ro
+
+    command:
+      - "--entrypoints.web.address=:80"
+
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls=true"
+      - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
+
+      - "--providers.file.filename=/dynamic/tls.yaml"
+
+      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
+      - "--providers.swarm.watch=true"
+      - "--providers.swarm.exposedbydefault=false"
+      - "--providers.swarm.network=traefik_traefik_proxy"
+
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+
+      - "--log.level=INFO"
+      - "--accesslog=true"
+      - ""
+
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=true"
+
+        - "traefik.http.routers.dashboard.rule=Host(`dashboard.swarm.localhost`)"
+        - "traefik.http.routers.dashboard.entrypoints=websecure"
+        - "traefik.http.routers.dashboard.service=api@internal"
+        - "traefik.http.routers.dashboard.tls=true"
+
+        - "traefik.http.middlewares.dashboard-auth.basicauth.users=<PASTE_HASH_HERE>"
+        - "traefik.http.routers.dashboard.middlewares=dashboard-auth@swarm"
+
+        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+
+networks:
+  traefik_proxy:
+    driver: overlay
+    attachable: true
