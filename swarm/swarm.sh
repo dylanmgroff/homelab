@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the IP addresses of the admin, managers, and workers nodes
-admin=10.9.50.5
+admin=10.9.50.10
 manager1=10.9.50.21
 manager2=10.9.50.22
 manager3=10.9.50.23
@@ -58,7 +58,6 @@ done
 # Copy SSH keys to MN1 to copy tokens back later
 scp -i /home/$user/.ssh/$certName /home/$user/$certName $user@$manager1:~/.ssh
 scp -i /home/$user/.ssh/$certName /home/$user/$certName.pub $user@$manager1:~/.ssh
-
 
 # Install dependencies for each node (Docker, GlusterFS)
 for newnode in "${all[@]}"; do
