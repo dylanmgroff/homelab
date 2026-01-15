@@ -11,12 +11,13 @@ services:
       - target: 80 # Container port (Traefik web entry point)
         published: 80 # Host port exposed on the nodes
         protocol: tcp
-        # 'host' mode binds directly to the node's IP where the task runs.
-        # 'ingress' mode uses Swarm's Routing Mesh (load balances across nodes).
-        # Choose based on your load balancing strategy. 'host' is often simpler if using an external LB.
         mode: host
       - target: 443 # Container port ( Traefik websecure entry point)
         published: 443 # Host port
+        protocol: tcp
+        mode: host
+      - target: 8080 # Container port ( Traefik dashboard)
+        published: 8080 # Host port
         protocol: tcp
         mode: host
 
@@ -26,7 +27,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /mnt/traefik/certs:/certs:ro
       - /mnt/traefik/dynamic:/dynamic:ro
-      - /mnt/traefik/logs:var/log/traefik/access.log
+      - /mnt/traefik/logs:/var/log/traefik
+
+    environment:
+      - CF_API_EMAIL=dylan.mgroff@gmail.com
+      - CF_DNS_API_TOKEN_FILE=/run/secrets/cf-token
+      - CF_ZONE_API_TOKEN_FILE=/run/secrets/cf-token
 
     # Traefik Static configuration via command-line arguments
     command:
@@ -41,9 +47,17 @@ services:
       # HTTPS EntryPoint
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.websecure.http.tls=true"
+      # - "--entrypoints.websecure.http.tls.certresolver=cloudflare"
+      # - "--certificatesresolvers.cloudflare.acme.caserver=https://acme-v02.api.letsencrypt.org/directory" #production
+      # - "--certificatesresolvers.cloudflare.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" #staging
+      # - "--certificatesresolvers.cloudflare.acme.email=dylan.mgroff@gmail.com"
+      # - "--certificatesresolvers.cloudflare.acme.storage=/certs/acme.json"
+      # - "--certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare"
+      # - "--certificatesresolvers.cloudflare.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
 
-      # Attach dynamic TLS file
-      - "--providers.file.filename=/dynamic/tls.yaml"
+      # Attach dynamic file directory and set to watch
+      - "--providers.file.directory=/dynamic"
+      - "--providers.file.watch=true"
 
       # Providers
 
@@ -65,8 +79,9 @@ services:
 
       # Observability
       - "--log.level=DEBUG" # Set the Log Level e.g INFO, DEBUG
-      - "--log.filePath=/env/" # Set the Log Level e.g INFO, DEBUG
+      - "--log.filePath=/var/log/traefik/traefik.log" # Set the Log Level e.g INFO, DEBUG
       - "--accesslog=true" # Enable Access Logs
+      - "--accesslog.filepath=/var/log/traefik/access.log"
       - "--metrics.prometheus=true"  # Enable Prometheus
 
     deploy:
@@ -91,7 +106,7 @@ services:
         - "traefik.http.routers.dashboard.tls=true"
 
         # Basic‑auth middleware
-        - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$2y$05$gVDVfEZLRGbgaLVFuCgJ.ORDTRZCNw0VBoXmsepg3H5sVjBdRuj66"
+        - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$iPnXia02$$5LPr.BPzgYvKZtgD0zUPN1"
         - "traefik.http.routers.dashboard.middlewares=dashboard-auth@swarm"
 
         # Service hint
