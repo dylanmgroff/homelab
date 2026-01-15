@@ -19,7 +19,7 @@ services:
       - "9000:9000"
       - "8000:8000"
     volumes:
-      - /mnt/portainer:/data
+      - /mnt/portainer/portainer_data:/data
     networks:
       - traefik_proxy
     deploy:
