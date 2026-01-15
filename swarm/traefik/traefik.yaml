@@ -1,0 +1,67 @@
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: true
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: "cloudflare"
+        domains:
+          - main: 'dylangroff.com'
+            sans:
+              - '*.dylangroff.com'
+
+log:
+  filePath: "/var/log/traefik/traefik.log"
+  level: "DEBUG"
+
+accessLog:
+  filePath: "/var/log/traefik/access.log"
+  addInternals: true
+  format: "json"
+  bufferingSize: 200
+  fields:
+    defaultMode: "keep"
+    headers:
+      defaultMode: "keep"
+      names:
+        X-Forwarded-For: "keep"
+
+api:
+  dashboard: true
+  insecure: false
+
+providers:
+  swarm:
+    endpoint: unix:///var/run/docker.sock
+    network: "traefik_proxy"
+    exposedbydefault: false
+  file:
+    watch: true
+    directory: "/dynamic/"
+
+certificatesResolvers:
+  cloudflare:
+    acme:
+      email: 'dylan.mgroff@gmail.com'
+      storage: '/certs/acme.json'
+      # caServer: 'https://acme-v02.api.letsencrypt.org/directory'
+      caServer: https://acme-staging-v02.api.letsencrypt.org/directory # staging (testing)
+      dnsChallenge:
+        provider: 'cloudflare'
+        delayBeforeCheck: '0'
+        resolvers:
+          - '1.1.1.1:53'
+          - '1.0.0.1:53'
+          - '8.8.8.8:53'
