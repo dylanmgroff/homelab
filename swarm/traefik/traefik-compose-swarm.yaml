@@ -1,117 +1,46 @@
 services:
   traefik:
     image: traefik:latest
-
     networks:
       - traefik_proxy
-    
     ports:
-        # Expose Traefik's entry points to the Swarm
-        # Swarm requires the long syntax for ports.
-      - target: 80 # Container port (Traefik web entry point)
-        published: 80 # Host port exposed on the nodes
+      - target: 80
+        published: 80
         protocol: tcp
         mode: host
-      - target: 443 # Container port ( Traefik websecure entry point)
-        published: 443 # Host port
+      - target: 443
+        published: 443
         protocol: tcp
         mode: host
-      - target: 8080 # Container port ( Traefik dashboard)
-        published: 8080 # Host port
+      - target: 8080
+        published: 8080
         protocol: tcp
         mode: host
-
     volumes:
-      # Mount the Docker socket for the Swarm provider
-      # This MUST be run from a manager node to access the Swarm API via the socket.
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /mnt/traefik/certs:/certs:ro
+      - /mnt/traefik/certs:/certs
       - /mnt/traefik/dynamic:/dynamic:ro
+      - /mnt/traefik/traefik.yaml:/traefik.yaml:ro
       - /mnt/traefik/logs:/var/log/traefik
-
     environment:
       - CF_API_EMAIL=dylan.mgroff@gmail.com
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cf-token
       - CF_ZONE_API_TOKEN_FILE=/run/secrets/cf-token
-
-    # Traefik Static configuration via command-line arguments
-    command:
-      # HTTP EntryPoint
-      - "--entrypoints.web.address=:80"
-
-      # Configure HTTP to HTTPS Redirection
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
-
-      # HTTPS EntryPoint
-      - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.websecure.http.tls=true"
-      # - "--entrypoints.websecure.http.tls.certresolver=cloudflare"
-      # - "--certificatesresolvers.cloudflare.acme.caserver=https://acme-v02.api.letsencrypt.org/directory" #production
-      # - "--certificatesresolvers.cloudflare.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" #staging
-      # - "--certificatesresolvers.cloudflare.acme.email=dylan.mgroff@gmail.com"
-      # - "--certificatesresolvers.cloudflare.acme.storage=/certs/acme.json"
-      # - "--certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare"
-      # - "--certificatesresolvers.cloudflare.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
-
-      # Attach dynamic file directory and set to watch
-      - "--providers.file.directory=/dynamic"
-      - "--providers.file.watch=true"
-
-      # Providers
-
-      # Enable the Docker Swarm provider (instead of Docker provider)
-      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
-
-      # Watch for Swarm service changes (requires socket access)
-      - "--providers.swarm.watch=true"
-
-      # Recommended: Don't expose services by default; require explicit labels
-      - "--providers.swarm.exposedbydefault=false"
-
-      # Specify the default network for Traefik to connect to services
-      - "--providers.swarm.network=traefik_proxy"
-
-      # API & Dashboard
-      - "--api.dashboard=true" # Enable the dashboard
-      - "--api.insecure=false" # Explicitly disable insecure API mod
-
-      # Observability
-      - "--log.level=DEBUG" # Set the Log Level e.g INFO, DEBUG
-      - "--log.filePath=/var/log/traefik/traefik.log" # Set the Log Level e.g INFO, DEBUG
-      - "--accesslog=true" # Enable Access Logs
-      - "--accesslog.filepath=/var/log/traefik/access.log"
-      - "--metrics.prometheus=true"  # Enable Prometheus
-
     deploy:
       mode: replicated
       replicas: 1
       placement:
-
-      # Placement constraints restrict where Traefik tasks can run.
-      # Running on manager nodes is common for accessing the Swarm API via the socket.
         constraints:
           - node.role == manager
-
-      # Traefik Dynamic configuration via labels
-      # In Swarm, labels on the service definition configure Traefik routing for that service.
       labels:
         - "traefik.enable=true"
-
-        # Dashboard router
         - "traefik.http.routers.dashboard.rule=Host(`traefik.manly.dylangroff.com`)"
         - "traefik.http.routers.dashboard.entrypoints=websecure"
         - "traefik.http.routers.dashboard.service=api@internal"
         - "traefik.http.routers.dashboard.tls=true"
-
-        # Basic‑auth middleware
         - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$iPnXia02$$5LPr.BPzgYvKZtgD0zUPN1"
         - "traefik.http.routers.dashboard.middlewares=dashboard-auth@swarm"
-
-        # Service hint
         - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-
 networks:
   traefik_proxy:
     external: true
