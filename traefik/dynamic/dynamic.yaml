@@ -20,7 +20,7 @@ http:
         stsIncludeSubdomains: true
         stsPreload: true
         stsSeconds: 63072000
-        contentSecurityPolicy: "default-src 'self'"
+        # contentSecurityPolicy: "default-src 'self'"
         customRequestHeaders:
           X-Forwarded-Proto: https
         customResponseHeaders:
