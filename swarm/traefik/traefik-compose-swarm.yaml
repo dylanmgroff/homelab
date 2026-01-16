@@ -18,14 +18,15 @@ services:
         mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /mnt/traefik/certs:/certs
+      - /mnt/traefik/cloudflare_api_token:/cloudflare_api_token:ro
+      - /mnt/traefik/letsencrypt:/letsencrypt
       - /mnt/traefik/dynamic:/dynamic:ro
       - /mnt/traefik/traefik.yaml:/traefik.yaml:ro
       - /mnt/traefik/logs:/var/log/traefik
     environment:
+      - TZ=America/Toronto
       - CF_API_EMAIL=dylan.mgroff@gmail.com
-      - CF_DNS_API_TOKEN_FILE=/run/secrets/cf-token
-      - CF_ZONE_API_TOKEN_FILE=/run/secrets/cf-token
+      - CF_DNS_API_TOKEN_FILE=cloudflare_api_token
     deploy:
       mode: replicated
       replicas: 1
@@ -34,12 +35,21 @@ services:
           - node.role == manager
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.dashboard.rule=Host(`traefik.manly.dylangroff.com`)"
-        - "traefik.http.routers.dashboard.entrypoints=websecure"
-        - "traefik.http.routers.dashboard.service=api@internal"
-        - "traefik.http.routers.dashboard.tls=true"
+        - "traefik.http.routers.traefik-secure.rule=Host(`traefik.manly.dylangroff.com`)"
+        - "traefik.http.routers.traefik-secure.entrypoints=websecure"
+        - "traefik.http.routers.traefik-secure.tls=true"
+        - "traefik.http.routers.traefik-secure.tls.certresolver=leresovler"
+        - "traefik.http.routers.traefik-secure.tls.domains[0].main=dylangroff.com"
+        - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.dylangroff.com"
+        - "traefik.http.routers.traefik-secure.tls.domains[1].main=dylangroff.cloud"
+        - "traefik.http.routers.traefik-secure.tls.domains[1].sans=*.dylangroff.cloud"
+        - "traefik.http.routers.traefik-secure.tls.domains[2].main=hotdogsound.com"
+        - "traefik.http.routers.traefik-secure.tls.domains[2].sans=*.hotdogsound.com"
+        - "traefik.http.routers.traefik-secure.tls.domains[3].main=dylangroff.ca"
+        - "traefik.http.routers.traefik-secure.tls.domains[3].sans=*.dylangroff.ca"
+        - "traefik.http.routers.traefik-secure.middlewares=dashboard-auth@swarm,default-security-headers@file"
         - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$iPnXia02$$5LPr.BPzgYvKZtgD0zUPN1"
-        - "traefik.http.routers.dashboard.middlewares=dashboard-auth@swarm"
+        - "traefik.http.routers.traefik-secure.service=api@internal"
         - "traefik.http.services.traefik.loadbalancer.server.port=8080"
 networks:
   traefik_proxy:
