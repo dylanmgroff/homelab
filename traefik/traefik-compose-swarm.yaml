@@ -39,6 +39,7 @@ services:
         - "traefik.http.routers.traefik-secure.entrypoints=websecure"
         - "traefik.http.routers.traefik-secure.service=traefik"
         - "traefik.http.routers.traefik-secure.middlewares=dashboard-auth@swarm"
+        - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
         - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$iPnXia02$$5LPr.BPzgYvKZtgD0zUPN1"
         - "traefik.http.routers.traefik-secure.service=api@internal"
         - "traefik.http.services.traefik.loadbalancer.server.port=8080"
