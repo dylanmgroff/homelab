@@ -16,11 +16,18 @@ entryPoints:
     address: ":443"
     http:
       tls:
-        certResolver: "cloudflare"
+        certResolver: "leresovler"
         domains:
           - main: 'dylangroff.com'
             sans:
               - '*.dylangroff.com'
+
+tls:
+  certificates:
+    - stores: ["default"]
+  stores:
+    default:
+      defaultCertificate: {}
 
 log:
   filePath: "/var/log/traefik/traefik.log"
@@ -52,12 +59,11 @@ providers:
     directory: "/dynamic/"
 
 certificatesResolvers:
-  cloudflare:
+  leresovler:
     acme:
       email: 'dylan.mgroff@gmail.com'
-      storage: '/certs/acme.json'
-      # caServer: 'https://acme-v02.api.letsencrypt.org/directory'
-      caServer: https://acme-staging-v02.api.letsencrypt.org/directory # staging (testing)
+      storage: '/letsencrypt/acme.json'
+      caServer: 'https://acme-v02.api.letsencrypt.org/directory'
       dnsChallenge:
         provider: 'cloudflare'
         delayBeforeCheck: '0'
