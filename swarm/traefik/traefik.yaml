@@ -16,18 +16,7 @@ entryPoints:
     address: ":443"
     http:
       tls:
-        certResolver: "leresovler"
-        domains:
-          - main: 'dylangroff.com'
-            sans:
-              - '*.dylangroff.com'
-
-tls:
-  certificates:
-    - stores: ["default"]
-  stores:
-    default:
-      defaultCertificate: {}
+        certResolver: "cloudflare"
 
 log:
   filePath: "/var/log/traefik/traefik.log"
@@ -59,7 +48,7 @@ providers:
     directory: "/dynamic/"
 
 certificatesResolvers:
-  leresovler:
+  cloudflare:
     acme:
       email: 'dylan.mgroff@gmail.com'
       storage: '/letsencrypt/acme.json'
