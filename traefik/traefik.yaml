@@ -24,15 +24,7 @@ log:
 
 accessLog:
   filePath: "/var/log/traefik/access.log"
-  addInternals: true
-  format: "json"
   bufferingSize: 200
-  fields:
-    defaultMode: "keep"
-    headers:
-      defaultMode: "keep"
-      names:
-        X-Forwarded-For: "keep"
 
 api:
   dashboard: true
