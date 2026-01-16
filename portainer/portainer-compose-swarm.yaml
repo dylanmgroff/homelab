@@ -19,7 +19,7 @@ services:
       - "9000:9000"
       - "8000:8000"
     volumes:
-      - /mnt/portainer/portainer_data:/data
+      - /mnt/portainer/data:/data
     networks:
       - traefik_proxy
     deploy:
@@ -31,6 +31,7 @@ services:
         - "traefik.enable=true"
         - "traefik.http.routers.portainer-secure.rule=Host(`port.manly.dylangroff.com`)"
         - "traefik.http.routers.portainer-secure.entrypoints=websecure"
+        - "traefik.http.routers.portainer-secure.tls.certresolver=cloudflare"
         - "traefik.http.routers.portainer-secure.service=portainer"
         - "traefik.http.services.portainer.loadbalancer.server.port=9000"
 networks:
