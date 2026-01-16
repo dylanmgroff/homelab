@@ -2,34 +2,28 @@ services:
   pihole:
     image: pihole/pihole:latest
     ports:
-      - target: 53
-        published: 53
-        protocol: tcp
-        mode: host
-      - target: 53
-        published: 53
-        protocol: udp
-        mode: host
-      - target: 67
-        published: 67
-        protocol: udp
-        mode: host
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "888:80"
     environment:
       - TZ=America/Toronto
-      - WEBPASSWORD_FILE=/run/secrets/pihole-webpass
     volumes:
-      - /mnt/pihole/data:/data
-      - /mnt/pihole/dnsmaq.d:/dnsmasq.d
+      - /mnt/pihole/etc:/etc/pihole
+      - /mnt/pihole/dns:/dnsmasq.d
     networks:
       - traefik_proxy
+    cap_add:
+      - SYS_TIME
     deploy:
       mode: replicated
       replicas: 1
       placement:
-        constraints: [node.role == manager]
+        constraints:
+          - node.role == manager
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.pihole-secure.rule=Host(`pihole.manly.dylangroff.com`)"
+        - "traefik.http.routers.pihole-secure.entrypoints=websecure"
         - "traefik.http.routers.pihole-secure.service=pihole"
         - "traefik.http.services.pihole.loadbalancer.server.port=80"
 networks:
