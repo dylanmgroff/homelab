@@ -30,6 +30,7 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.portainer-secure.rule=Host(`port.manly.dylangroff.com`)"
+        - "traefik.http.routers.portainer-secure.entrypoints=websecure"
         - "traefik.http.routers.portainer-secure.service=portainer"
         - "traefik.http.services.portainer.loadbalancer.server.port=9000"
 networks:
