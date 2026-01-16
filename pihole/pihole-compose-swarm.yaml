@@ -9,7 +9,7 @@ services:
       - TZ=America/Toronto
     volumes:
       - /mnt/pihole/etc:/etc/pihole
-      - /mnt/pihole/dns:/dnsmasq.d
+      - /mnt/pihole/dns:/etc/dnsmasq.d
     networks:
       - traefik_proxy
     cap_add:
