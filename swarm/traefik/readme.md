@@ -1,9 +1,10 @@
+create a docker secret containing the cloudflare api key
+
 ssh to manager node
 
 ```bash
 sudo su
 cd /mnt/traefik
-touch cloudflare_api_token
 mkdir ./dynamic
 touch ./dynamic/dynamic.yaml
 mkdir ./letsencrypt
