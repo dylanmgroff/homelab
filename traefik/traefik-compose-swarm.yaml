@@ -18,15 +18,16 @@ services:
         mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /mnt/traefik/cloudflare_api_token:/cloudflare_api_token:ro
-      - /mnt/traefik/letsencrypt:/letsencrypt
-      - /mnt/traefik/dynamic:/dynamic:ro
-      - /mnt/traefik/traefik.yaml:/traefik.yaml:ro
-      - /mnt/traefik/logs:/var/log/traefik
+      - ./letsencrypt:/letsencrypt
+      - ./dynamic:/dynamic:ro
+      - ./traefik.yaml:/traefik.yaml:ro
+      - ./logs:/var/log/traefik
     environment:
       - TZ=America/Toronto
       - CF_API_EMAIL=dylan.mgroff@gmail.com
-      - CF_DNS_API_TOKEN_FILE=/run/secrets/cf-token
+      - CF_DNS_API_TOKEN_FILE=/run/secrets/CF_DNS_API_TOKEN
+    secrets:
+      - CF_DNS_API_TOKEN
     deploy:
       mode: replicated
       replicas: 1
@@ -39,10 +40,12 @@ services:
         - "traefik.http.routers.traefik-secure.entrypoints=websecure"
         - "traefik.http.routers.traefik-secure.service=traefik"
         - "traefik.http.routers.traefik-secure.middlewares=dashboard-auth@swarm"
-        - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
         - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$iPnXia02$$5LPr.BPzgYvKZtgD0zUPN1"
         - "traefik.http.routers.traefik-secure.service=api@internal"
         - "traefik.http.services.traefik.loadbalancer.server.port=8080"
 networks:
   traefik_proxy:
     external: true
+secrets:
+  CF_DNS_API_TOKEN:
+    file: ./CF_DNS_API_TOKEN
