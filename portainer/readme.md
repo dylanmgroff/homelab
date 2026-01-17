@@ -10,6 +10,6 @@ ssh to that node
 
 deploy the service
 ```bash
-mkdir /mnt/portainer/portainer_data
+mkdir /mnt/portainer/data
 sudo docker stack deploy -c portainer-compose-swarm.yml portainer
 ```
