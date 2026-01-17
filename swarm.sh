@@ -1,18 +1,18 @@
 #!/bin/bash
 
 # Set the IP addresses of the admin, managers, and workers nodes
-admin=10.9.50.5
-manager1=10.9.50.21
-manager2=10.9.50.22
-manager3=10.9.50.23
-worker1=10.9.50.24
-worker2=10.9.50.25
-worker3=10.9.50.26
+admin=10.9.50.50
+manager1=10.9.50.51
+manager2=10.9.50.52
+manager3=10.9.50.53
+worker1=10.9.50.54
+worker2=10.9.50.55
+worker3=10.9.50.56
 
 # Set the workers' hostnames (if using cloud-init in Proxmox it's the name of the VM)
-workerHostname1=pveds-n01-w01
-workerHostname2=pveds-n02-w02
-workerHostname3=pveds-n03-w03
+workerHostname1=Swarm-N01-W01
+workerHostname2=Swarm-N02-W02
+workerHostname3=Swarm-N03-W03
 
 # User of remote machines
 user=dylangroff
@@ -74,7 +74,8 @@ for newnode in "${all[@]}"; do
     $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
     tee /etc/apt/sources.list.d/docker.list > /dev/null
   apt-get update
-  NEEDRESTART_MODE=a apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+  NEEDRESTART_MODE=a apt install docker-ce="5:28.5.2-1~ubuntu.24.04~noble" docker-ce-cli="5:28.5.2-1~ubuntu.24.04~noble" docker-ce-rootless-extras="5:28.5.2-1~ubuntu.24.04~noble" containerd.io docker-buildx-plugin docker-compose-plugin -y
+  apt-mark hold docker-ce docker-ce-cli docker-ce-rootless-extras containerd.io docker-buildx-plugin docker-compose-plugin
   NEEDRESTART_MODE=a apt install software-properties-common glusterfs-server -y
   systemctl start glusterd
   systemctl enable glusterd
