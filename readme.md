@@ -53,16 +53,7 @@ Set the username and password
 Add your SSH key
 Increase disk size to 10GB
 Start at boot
-
-1. Convert to template
-```bash
-qm template 9000
-```
-
-1. Create a VM from the template
-```bash
-qm clone 9000 201 --name "new-ubuntu-vm"
-```
+Make sure the Net0 interface is set to DHCP
 
 # Deploy Nodes
 When it comes time to deploy select "Clone Template" and set the mode to "Full Clone".
@@ -80,36 +71,6 @@ manager3    10.9.50.23</br>
 worker1     10.9.50.24</br>
 worker2     10.9.50.25</br>
 worker3     10.9.50.26</br>
-
-# Fix Node Networking
-There was an interesting issue where the nodes didn't have any networking configured. Solve is as follows:
-
-Open console for the node and login
-
-```bash
-sudo su
-cd /etc/netplan
-touch 01-netcfg.yaml
-chmod 600 01-netcfg.yaml
-nano 01-netcfg.yaml
-```
-
-paste in the following then writeout
-
-```
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    enp0s18:
-      dhcp4: true
-```
-
-```bash
-netplan apply
-```
-
-now the network should be working
 
 # Swarm Init
 
