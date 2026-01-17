@@ -14,3 +14,15 @@ mkdir /mnt/pihole/etc
 mkdir /mnt/pihole/dns
 docker stack deploy -c pihole-compose-swarm.yaml pihole --detach=false
 ```
+
+once pihole is started, attach the console through portainer
+```bash
+pihole setpassword
+```
+
+Login through the admin panel
+
+In settings: 
+- change the DNS upstream servers to Cloudflare
+- change interface settings to "permit all origins"
+- enable misc.etc_dnsmasq_d in "all settings / Miscellaneous"
