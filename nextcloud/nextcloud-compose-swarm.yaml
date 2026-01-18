@@ -1,61 +1,85 @@
 services:
-  app:
-    image: ghcr.io/linuxserver/nextcloud
-    environment:
-      - PUID=501
-      - PGID=20
-      - TZ=America/Toronto
-    volumes:
-      - /mnt/dg-nextcloud/app/config:/config
-      - /mnt/dg-nextcloud/app/data:/data
+  db:
+    image: mariadb:lts-noble
+    command: --transaction-isolation=READ-COMMITTED
     networks:
+      - nextcloud
+    volumes:
+      - ./mariadb:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/MYSQL_ROOT_PASSWORD
+      - MYSQL_PASSWORD_FILE=/run/secrets/MYSQL_USER_PASSWORD
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MARIADB_AUTO_UPGRADE=1
+      - MARIADB_DISABLE_UPGRADE_BACKUP=1
+    secrets:
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_USER_PASSWORD
+      
+  app:
+    image: nextcloud
+    networks:
+      - nextcloud
       - traefik_proxy
-      - dg-nextcloud
+    volumes:
+      - ./app:/var/www/html
+    secrets:
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_USER_PASSWORD
+      - NEXTCLOUD_ADMIN_PASSWORD
+      - SMTP_PASSWORD
+    depends_on:
+      - db
+      - redis
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.dgnc-secure.rule=Host(`nextcloud.manly.dylangroff.com`)"
-        - "traefik.http.routers.dgnc-secure.entrypoints=websecure"
-        - "traefik.http.routers.dgnc-secure.middlewares=nextcloud-dav-redirect@file"
-        - "traefik.http.routers.dgnc-secure.tls.certresolver=cloudflare"
-        - "traefik.http.routers.dgnc-secure.service=dgnc"
-        - "traefik.http.services.dgnc.loadbalancer.server.port=80"
-    depends_on:
-      - mariadb
-      - redis
-  mariadb:
-    image: docker.io/mariadb:10.5
-    environment:
-      - TZ=America/Toronto
-      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/ncdg_mysql_root_pass
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD_FILE=/run/secrets/ncdg_mysql_user_pass
-    volumes:
-      - /mnt/dg-nextcloud/mariadb/config:/etc/mysql/conf.d
-      - /mnt/dg-nextcloud/mariadb/mysql-data:/var/lib/mysql
-    networks:
-      - dg-nextcloud
-    secrets:
-      - ncdg_mysql_root_pass
-      - ncdg_mysql_user_pass
+        - "traefik.http.routers.nextcloud-secure.rule=Host(`files.dylangroff.com`)"
+        - "traefik.http.routers.nextcloud-secure.entrypoints=websecure"
+        - "traefik.http.routers.nextcloud-secure.middlewares=nextcloud-dav-redirect@file"
+        - "traefik.http.routers.nextcloud-secure.service=nextcloud"
+        - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
+  
   redis:
-    image: docker.io/redis:6-alpine
-    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
-    volumes:
-      - /mnt/dg-nextcloud/redis/config:/usr/local/etc/redis
-      - /mnt/dg-nextcloud/redis/redis-data:/data
+    image: redis:alpine
     networks:
-      - dg-nextcloud
+      - nextcloud
+    ports:
+      6379:6379
+    volumes:
+      - ./redis/data:/data
+      - ./redis/conf:/usr/local/etc/redis
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
 
-networks:
-  traefik_proxy:
-    external: true
-  dg-nextcloud:
-    external: true
+  appapi-dsp:
+    image: ghcr.io/nextcloud/nextcloud-appapi-dsp:main
+    networks:
+      - nextcloud
+    ports:
+      - 8780:8780
+      - 8782:8782
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - NC_HAPROXY_PASSWORD=/run/secrets/HP_SHARED_KEY
+    secrets:
+      - HP_SHARED_KEY
 
 secrets:
-  mysql_root_pass:
-    file: /mnt/dg-nextcloud/secrets/mysql_root_pass
-  mysql_user_pass:
-    file: /mnt/dg-nextcloud/secrets/mysql_user_pass
+  MYSQL_ROOT_PASSWORD:
+    file: ./secrets/MYSQL_ROOT_PASSWORD
+  MYSQL_USER_PASSWORD:
+    file: ./secrets/MYSQL_USER_PASSWORD
+  NEXTCLOUD_ADMIN_PASSWORD:
+    file: ./secrets/NEXTCLOUD_ADMIN_PASSWORD
+  HP_SHARED_KEY:
+    file: ./secrets/HP_SHARED_KEY
+  SMTP_PASSWORD:
+    file: ./secrets/SMTP_PASSWORD
+
+networks:
+  nextcloud:
+    external: true
+  traefik_proxy:
+    external: true
